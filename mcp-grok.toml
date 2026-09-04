@@ -1,0 +1,6 @@
+# Paste under [mcp_servers] in ~/.grok/config.toml (or project .grok/config.toml).
+# Then start a NEW Grok session. server.mjs must already be listening on 8765.
+
+# [mcp_servers.hormuz]
+# command = "node"
+# args = ["C:\\Git\\HORMUZ\\mcp-hormuz.mjs"]
