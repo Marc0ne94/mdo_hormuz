@@ -1,0 +1,11 @@
+{
+  "name": "mdo_hormuz",
+  "private": true,
+  "version": "0.2.0",
+  "description": "KHARG voxel sandbox. Command bus + MCP. Not Ocra. Not ABAP.",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "mcp": "node mcp-hormuz.mjs"
+  }
+}

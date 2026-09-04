@@ -1,0 +1,9 @@
+# MCP di questo repo. Grok lo carica se il workspace è mdo_hormuz.
+# Sessione nuova dopo il primo clone. Il bus :8765 parte da solo al primo tool.
+
+[mcp_servers.hormuz]
+command = "node"
+args = ["mcp-hormuz.mjs"]
+enabled = true
+startup_timeout_sec = 25
+tool_timeout_sec = 20

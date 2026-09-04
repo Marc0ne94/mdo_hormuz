@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { parseVoice } from "./parse-voice.mjs";
+import { OPS, SIDES, WEAPONS, VERSION, PRODUCT } from "./ops.mjs";
 
 const __dir = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.HORMUZ_PORT || 8765);
@@ -45,12 +46,11 @@ function normalize(raw) {
   const x = Number(raw.x);
   const z = Number(raw.z);
   const r = Math.max(1, Math.min(5, Number(raw.r) || 3.2));
-  const side = ["sea", "land", "irn"].includes(raw.side) ? raw.side : "sea";
-  const weapon = ["missile", "bomb", "cannon"].includes(raw.weapon) ? raw.weapon : "missile";
+  const side = SIDES.includes(raw.side) ? raw.side : "sea";
+  const weapon = WEAPONS.includes(raw.weapon) ? raw.weapon : "missile";
   const who = raw.who != null ? String(raw.who).slice(0, 80) : "";
   const zone = raw.zone != null ? String(raw.zone).slice(0, 24) : "";
-  const allowed = ["bomb", "navy", "artillery", "air", "radar", "status", "possess", "fire", "paradrop", "barrage", "lock", "carpet", "cruise", "smoke", "uav", "heli", "oilfire", "launch", "moab", "battle"];
-  if (!allowed.includes(op)) return { error: "unknown op", op };
+  if (!OPS.includes(op)) return { error: "unknown op", op };
   return { op, src, n, x, z, r, side, weapon, who, zone, id: ++seq, ts: Date.now() };
 }
 
@@ -101,7 +101,10 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (req.method === "GET" && u.pathname === "/status") {
-    send(res, 200, JSON.stringify({ ok: true, seq, clients: sse.size, last: log.slice(-8) }, null, 2), MIME[".json"]);
+    send(res, 200, JSON.stringify({
+      ok: true, product: PRODUCT, version: VERSION,
+      seq, clients: sse.size, last: log.slice(-8), ops: OPS
+    }, null, 2), MIME[".json"]);
     return;
   }
 
@@ -146,5 +149,5 @@ setInterval(() => {
 }, 60000);
 
 server.listen(PORT, "127.0.0.1", () => {
-  process.stderr.write(`HORMUZ cmd bus  http://127.0.0.1:${PORT}/\n`);
+  process.stderr.write(`${PRODUCT} ${VERSION}  http://127.0.0.1:${PORT}/\n`);
 });

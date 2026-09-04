@@ -48,36 +48,52 @@ WORLD  voxel + props Kharg          ENGINE  bus + HTTP/SSE + MCP
 
 ## Bus
 
+Fonte op: `ops.mjs`. POST `/cmd` e `hormuz_cmd` usano lo stesso JSON.
+
 ```
-{ "op":"bomb",      "x":80, "z":90, "r":3.2, "src":"mcp" }
-{ "op":"navy",      "side":"sea"|"land"|"irn", "n":1..8, "src":"mcp" }
-{ "op":"artillery", "x":160, "z":80, "src":"mcp" }
-{ "op":"air",       "side":"sea"|"land"|"irn", "src":"mcp" }
-{ "op":"radar",     "src":"mcp" }
-{ "op":"status" }
+{ "op":"bomb"|"navy"|"artillery"|"air"|"radar"|"possess"|"fire"|
+       "paradrop"|"barrage"|"lock"|"carpet"|"cruise"|"smoke"|
+       "uav"|"heli"|"oilfire"|"launch"|"moab"|"battle",
+  "x","z","r","n","side","weapon","who","zone","src" }
 ```
 
-POST `/cmd` → coda + broadcast. GET `/events` SSE. GET `/status`.
-MCP `mcp-hormuz.mjs` wrappa POST. UI bottoni wrappano POST.
-`window.HORMUZ.cmd(obj)` in console.
+POST `/cmd` → coda + SSE. POST `/voice` → `parse-voice.mjs` → stesso bus.
+GET `/events` SSE. GET `/status` (include `ops` e `version`).
+UI e `window.HORMUZ.cmd(obj)` wrappano POST.
+
+## MCP
+
+Tre tool, config **di progetto** `.grok/config.toml`:
+
+| Tool | Endpoint |
+|---|---|
+| `hormuz_status` | GET `/status` |
+| `hormuz_cmd` | POST `/cmd` |
+| `hormuz_voice` | POST `/voice` |
+
+`mcp-hormuz.mjs` alza `server.mjs` se :8765 è giù. Non va in `~/.grok/config.toml`.
 
 ## Processi
 
 ```
-node server.mjs          # :8765
-node mcp-hormuz.mjs      # stdio → 8765
+avvia.cmd                 # bus + browser
+node server.mjs           # :8765
+node mcp-hormuz.mjs       # stdio → 8765 (Grok lo lancia)
 ```
 
-Snippet Grok: `mcp-grok.toml`. Serve **sessione nuova** dopo il paste in config.
+Serve **sessione Grok nuova** sul workspace `mdo_hormuz` per vedere i tool.
 
 ## File
 
 | File | Ruolo |
 |---|---|
 | `index.html` | mondo + sim + vista |
+| `ops.mjs` | catalogo op |
 | `server.mjs` | static + bus |
-| `mcp-hormuz.mjs` | tool MCP |
+| `mcp-hormuz.mjs` | MCP stdio |
+| `.grok/config.toml` | MCP progetto |
 | `ARCH.md` | questo piano |
+| `AGENTS.md` | contratto agenti |
 | `MDO.MD` | voce, non riassunto |
 | `avvia.cmd` | alza il bus e il browser |
 
@@ -86,8 +102,8 @@ Snippet Grok: `mcp-grok.toml`. Serve **sessione nuova** dopo il paste in config.
 - [x] Kharg come scacchiera (non lo stretto)
 - [x] tre fazioni, spawn infinito
 - [x] carrier / DDG / colonna / artiglieria / SAM / jet (gioco)
-- [x] bus bomb navy artillery air radar
-- [x] MCP stdio
+- [x] bus = `ops.mjs` (cmd + voce + UI)
+- [x] MCP progetto: status / cmd / voice
 - [x] niente versus
 
 ## Voce (slice 1b)

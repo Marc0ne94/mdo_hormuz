@@ -7,7 +7,7 @@ POST http://127.0.0.1:8765/voice
 { "text": "spara missile", "src": "glasses" }
 ```
 
-O MCP `hormuz_voice` con lo stesso `text`.
+O MCP `hormuz_voice` con lo stesso `text`. I comandi già JSON vanno in `hormuz_cmd`.
 
 ## Frasi che il parser capisce
 
