@@ -3,4 +3,4 @@
 
 # [mcp_servers.hormuz]
 # command = "node"
-# args = ["C:\\Git\\HORMUZ\\mcp-hormuz.mjs"]
+# args = ["C:\\Git\\mdo_hormuz\\mcp-hormuz.mjs"]
