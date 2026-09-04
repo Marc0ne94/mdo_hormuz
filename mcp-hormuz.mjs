@@ -1,13 +1,12 @@
 #!/usr/bin/env node
 /**
- * MCP stdio → bus HTTP Kharg.
- * Tre tool: status, cmd, voice. Il bus normalizza le op (ops.mjs).
- * Se :8765 è giù, alza server.mjs (niente browser).
+ * Adattatore Kharg: tool + bus HTTP.
+ * Il loop JSON-RPC sta in mcp-stdio/ — non mescolarlo con le op.
  */
-import { createInterface } from "readline";
 import { spawn } from "child_process";
 import path from "path";
 import { fileURLToPath } from "url";
+import { runStdioMcp } from "./mcp-stdio/stdio.mjs";
 import { WRITE_OPS, SIDES, WEAPONS, VERSION, PRODUCT } from "./ops.mjs";
 
 const __dir = path.dirname(fileURLToPath(import.meta.url));
@@ -75,7 +74,7 @@ async function ensureBus() {
   if (!AUTO) throw new Error("bus giù su " + BASE + " (HORMUZ_NO_AUTOSTART=1)");
   if (!starting) {
     starting = (async () => {
-      process.stderr.write("hormuz mcp: avvio server.mjs\n");
+      process.stderr.write("hormuz: avvio server.mjs\n");
       const child = spawn(process.execPath, [path.join(__dir, "server.mjs")], {
         cwd: __dir,
         detached: true,
@@ -95,7 +94,6 @@ async function ensureBus() {
 }
 
 async function post(pathname, body) {
-  await ensureBus();
   const r = await fetch(BASE + pathname, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -105,77 +103,22 @@ async function post(pathname, body) {
   try { return JSON.parse(t); } catch { return { ok: false, raw: t, http: r.status }; }
 }
 
-async function getStatus() {
-  await ensureBus();
-  const r = await fetch(BASE + "/status");
-  return r.json();
-}
-
-function ok(id, obj) {
-  return {
-    jsonrpc: "2.0",
-    id,
-    result: { content: [{ type: "text", text: JSON.stringify(obj, null, 2) }] }
-  };
-}
-function fail(id, msg) {
-  return { jsonrpc: "2.0", id, error: { code: -32000, message: String(msg) } };
-}
-
-function reply(obj) {
-  process.stdout.write(JSON.stringify(obj) + "\n");
-}
-
-async function callTool(name, args) {
+async function call(name, args) {
   args = args || {};
-  if (name === "hormuz_status") return getStatus();
-  if (name === "hormuz_voice") {
-    return post("/voice", { text: args.text, src: "mcp" });
+  if (name === "hormuz_status") {
+    const r = await fetch(BASE + "/status");
+    return r.json();
   }
-  if (name === "hormuz_cmd") {
-    const body = { ...args, src: "mcp" };
-    return post("/cmd", body);
-  }
+  if (name === "hormuz_voice") return post("/voice", { text: args.text, src: "mcp" });
+  if (name === "hormuz_cmd") return post("/cmd", { ...args, src: "mcp" });
   throw new Error("unknown tool " + name);
 }
 
-const rl = createInterface({ input: process.stdin });
-rl.on("line", async (line) => {
-  if (!line.trim()) return;
-  let msg;
-  try { msg = JSON.parse(line); }
-  catch { return; }
-  const { id, method, params } = msg;
-  try {
-    if (method === "initialize") {
-      reply({
-        jsonrpc: "2.0",
-        id,
-        result: {
-          protocolVersion: "2024-11-05",
-          serverInfo: { name: "hormuz", version: VERSION, title: PRODUCT },
-          capabilities: { tools: {} }
-        }
-      });
-      ensureBus().catch((e) => process.stderr.write("hormuz mcp: " + e.message + "\n"));
-      return;
-    }
-    if (method === "notifications/initialized" || method === "notifications/cancelled") return;
-    if (method === "ping") {
-      if (id != null) reply({ jsonrpc: "2.0", id, result: {} });
-      return;
-    }
-    if (method === "tools/list") {
-      reply({ jsonrpc: "2.0", id, result: { tools: TOOLS } });
-      return;
-    }
-    if (method === "tools/call") {
-      const out = await callTool(params.name, params.arguments || {});
-      reply(ok(id, out));
-      return;
-    }
-    if (id != null) reply({ jsonrpc: "2.0", id, error: { code: -32601, message: String(method) } });
-  } catch (e) {
-    if (id != null) reply(fail(id, e.message));
-  }
+runStdioMcp({
+  name: "hormuz",
+  version: VERSION,
+  title: PRODUCT,
+  tools: TOOLS,
+  ensure: ensureBus,
+  call
 });

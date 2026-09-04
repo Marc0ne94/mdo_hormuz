@@ -11,7 +11,8 @@ O: `npm start` / `node server.mjs`.
 
 ## MCP Grok
 
-In questo repo: `.grok/config.toml` (server `hormuz`).
+Connettore isolato: `mcp-stdio/` (riuso in altri progetti).
+Adattatore Kharg: `mcp-hormuz.mjs`. Config progetto: `.grok/config.toml`.
 Apri Grok **su `C:\Git\mdo_hormuz`**. Al primo tool il bus parte da solo.
 
 | Tool | Fa |

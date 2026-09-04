@@ -71,7 +71,8 @@ Tre tool, config **di progetto** `.grok/config.toml`:
 | `hormuz_cmd` | POST `/cmd` |
 | `hormuz_voice` | POST `/voice` |
 
-`mcp-hormuz.mjs` alza `server.mjs` se :8765 è giù. Non va in `~/.grok/config.toml`.
+Loop: `mcp-stdio/stdio.mjs` (generico). Adattatore: `mcp-hormuz.mjs` (alza il bus se giù).
+Non va in `~/.grok/config.toml`.
 
 ## Processi
 
@@ -90,7 +91,8 @@ Serve **sessione Grok nuova** sul workspace `mdo_hormuz` per vedere i tool.
 | `index.html` | mondo + sim + vista |
 | `ops.mjs` | catalogo op |
 | `server.mjs` | static + bus |
-| `mcp-hormuz.mjs` | MCP stdio |
+| `mcp-stdio/` | connettore MCP stdio (riuso) |
+| `mcp-hormuz.mjs` | adattatore Kharg |
 | `.grok/config.toml` | MCP progetto |
 | `ARCH.md` | questo piano |
 | `AGENTS.md` | contratto agenti |

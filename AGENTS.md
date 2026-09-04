@@ -11,9 +11,10 @@ Sandbox voxel in un HTML. **Non è Ocra. Non è ABAP. Non è Blender.**
 
 ## MCP (progetto)
 
-Config: `.grok/config.toml` → server `hormuz`.
-Tool: `hormuz_status` · `hormuz_cmd` · `hormuz_voice`.
-Il wrapper alza il bus se è giù. Non aprire Blender, non copiare MCP in `~/.grok/config.toml`.
+- Loop generico: `mcp-stdio/` (copiabile in altri repo — vedi `mcp-stdio/CONNECTOR.md`)
+- Adattatore Kharg: `mcp-hormuz.mjs` (tool + bus). Non mescolare le op nel loop.
+- Config: `.grok/config.toml` scope **progetto**. Non copiare in `~/.grok/config.toml`.
+- Tool: `hormuz_status` · `hormuz_cmd` · `hormuz_voice`. `ensure` alza il bus se è giù.
 
 ## Vincoli
 
