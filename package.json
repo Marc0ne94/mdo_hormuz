@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node server.mjs",
-    "mcp": "node mcp-hormuz.mjs"
+    "mcp": "node mcp-hormuz.mjs",
+    "test": "node --test test/voice-stdio.test.mjs test/http-mcp.test.mjs test/theaters.test.mjs"
   }
 }

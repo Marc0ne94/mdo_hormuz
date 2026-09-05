@@ -3,6 +3,7 @@ export function parseVoice(text, src) {
   const raw = String(text || "").trim();
   const t = raw.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const out = { src: src || "voice", text: raw };
+  if (!raw) return { ...out, error: "unrecognized" };
 
   const num = (re, d) => {
     const m = t.match(re);
@@ -47,7 +48,10 @@ export function parseVoice(text, src) {
   if (/fumo|smoke|cortina|flare/.test(t)) return { ...out, op: "smoke", ...Z() };
   if (/\buav\b|drone|occhio in cielo/.test(t)) return { ...out, op: "uav", side: /sea/.test(t) ? "sea" : "land", ...Z() };
   if (/bird in hot|elicottero hot|inserzione/.test(t)) return { ...out, op: "heli", side: /sea/.test(t) ? "sea" : "irn", ...Z() };
-  if (/oleodotto|oilfire|tank farm in fiamme/.test(t)) return { ...out, op: "oilfire", ...Z() };
+  if (/oleodotto|oilfire|tank farm in fiamme|farm in fiamme|civili|civilian/.test(t)) return { ...out, op: "oilfire", zone: zone() || "farm", ...xz() };
+  if (/\birn\b|iranian|iraniani/.test(t) && /terreno|isola|spawn|chiama|arriva|dal/.test(t)) {
+    return { ...out, op: "navy", side: "irn", n: num(/(\d+)/, 3), ...Z() };
+  }
   if (/catapulta|lancia jet|launch/.test(t) && /carrier|portaerei|catapult/.test(t)) return { ...out, op: "launch", side: "sea" };
   if (/moab|madre di tutte/.test(t)) return { ...out, op: "moab", ...Z() };
 
@@ -75,5 +79,5 @@ export function parseVoice(text, src) {
   if (/lock|bersaglio|fixa|inquadra/.test(t)) return { ...out, op: "lock", who: w, ...Z() };
 
   if (weapon) return { ...out, op: "fire", weapon, who: w, ...Z() };
-  return { ...out, op: "bomb", ...Z(), r: 3.2 };
+  return { ...out, error: "unrecognized" };
 }

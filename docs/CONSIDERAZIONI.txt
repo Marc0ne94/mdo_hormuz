@@ -1,0 +1,211 @@
+KHARG / HORMUZ — CONSIDERAZIONI
+================================
+Carta di orientamento, non un regolamento. Il prodotto è flessibile e si scala.
+I numeri sotto sono una fotografia di questa working copy (settembre 2026).
+Se il codice e questo foglio divergono, si aggiorna il foglio — o si rende il
+numero eseguibile in un test, così non invecchia in silenzio.
+
+
+1. Cos'è oggi
+-------------
+Sandbox voxel in un HTML (Three.js r170) + bus Node su http://127.0.0.1:8765/
++ tre tool MCP di progetto (hormuz_status, hormuz_cmd, hormuz_voice).
+
+Non è Ocra, non è ABAP. Il runtime attuale è cubetti stile MagicaVoxel,
+leggibili in tattica. Non è un wargame con vincitore e non è un aiuto al
+targeting reale: le classi mezzo sono giocattoli. Questo carattere si può
+far evolvere; non è una gabbia.
+
+Avvio: avvia.cmd  oppure  node server.mjs
+Teatri:  /           Kharg
+         /?t=gaza    Gaza
+         /?t=hormuz  Stretto (Dubai–Kahnuj)
+Switch = reload dell'engine. Un mondo in RAM alla volta: tre mondi tenuti
+in memoria anche se non disegnati pesano comunque (voxel, mesh, sim).
+
+
+2. Cosa è già più del "Kharg 0.2"
+---------------------------------
+Il piano look/pioggia (docs/superpowers/plans/2026-09-05-kharg-look-perf-rain.md)
+era una slice su un solo HTML Kharg (notte, fps, pioggia). Quella slice è
+superata. Non è la fotografia.
+
+In questa working copy, oltre a Kharg dettagliato:
+
+  • tre teatri-modello in theaters/ (dati) + engine/theater.mjs (load, xz, km)
+  • Gaza: poligono della striscia, pianura, USA in rada (stesso catalogo navi),
+    ISR sulla cornice, volée della striscia, cupole toy (Ashkelon, Sderot,
+    Netivot, Zikim, Ashdod, Be'er Sheva)
+  • cornice allargata: Ashdod, Be'er Sheva, Kiryat Gat, Ofakim. Tel Aviv e
+    Gerusalemme restano fuori da questo inquadramento
+  • Hormuz: quadrato Dubai (Jebel Ali) – Kahnuj, maschere di rilievo
+  • plugin meteo engine/plugins/weather.mjs — spento in test; notte/pioggia
+    come lavoro dedicato, non come core
+  • test: bus, voce fail-closed, teatri, poligono Gaza  (npm test)
+
+Il lavoro nuovo è in gran parte ancora uncommitted su master. La fotografia
+utile è questa working copy, non il commit "KHARG 0.2" in git.
+
+
+3. Teatri (geografia)
+---------------------
+I bounds vivono in theaters/*.mjs. engine/theater.mjs calcola km e m/voxel.
+
+  kharg    50.05–50.62 E, 29.08–29.40 N
+           griglia 192×160×64    ~55 × 36 km    ~290 × 224 m/voxel
+           generatore dettagliato (isola, Khargu, costa, pista, tank farm)
+
+  gaza     34.05–34.95 E, 31.06–31.88 N
+           griglia 256×256×64    ~85 × 91 km    ~335 × 358 m/voxel
+           striscia da poligono + Mediterraneo ovest + cornice ISR
+           HUD: US / ISR / GZA     token MCP invariati: sea / land / irn
+
+  hormuz   54.36–57.71 E, 24.95–27.95 N
+           griglia 256×256×64    ~334 × 334 km  ~1,3 km/voxel
+           overview dello stretto (Qeshm, Musandam, Bandar Abbas, TSS)
+
+Si possono aggiungere teatri nello stesso modo: un file in theaters/,
+bounds, luoghi, maschere o poligoni, ?t=id. La griglia si alza quando
+servono streaming/LOD; oggi è un compromesso Surface.
+
+
+4. Due scale (non 1:1, e va bene)
+---------------------------------
+Il terreno e i mezzi non condividono i metri. Sono due scale da sitrep.
+
+  Terreno  — il voxel vale centinaia di metri (Kharg/Gaza) o ~1,3 km (Hormuz).
+  Prefab   — cubetti con misure fisse in voxel, uguali su tutti i teatri,
+             così restano leggibili dalla camera tattica.
+
+Ordine di grandezza attuale dei mezzi (asse lungo in voxel, poi metri
+implicati se si moltiplica per il m/voxel del teatro):
+
+  pezzo        voxel    Kharg      Gaza       Hormuz     reale (ordine)
+  portaerei      22     ~6 km      ~7 km      ~29 km     ~330 m
+  petroliera     17     ~5 km      ~6 km      ~22 km     ~300 m
+  DDG            10     ~3 km      ~3 km      ~13 km     ~150 m
+  pattuglia     3.8     ~1 km      ~1 km       ~5 km     ~50 m
+  carro/camion  2.6     ~700 m     ~900 m      ~3 km     ~7 m
+  persona       0.7     ~160 m     ~240 m     ~900 m     1,8 m
+
+Non è un errore di un metro: è un giocattolo da situation room. Lo stesso
+CVN su Hormuz è un'icona. Se un giorno si vuole la scala 1:1, si cambia il
+catalogo o il m/voxel — il prodotto lo consente.
+
+
+5. Cataloghi di oggi (spezzati) e catalogo che si vuole
+-------------------------------------------------------
+Oggi tre elenchi, nessuno è la geometria completa:
+
+  ops.mjs            comandi del bus (bomb, navy, battle, …)
+  theaters/*.mjs     luoghi (lon/lat), poligoni, spot
+  make* in index.html cubetti 3D, misure in voxel hard-coded
+
+Obiettivo: engine/catalog.mjs come elenco mezzi/compositi, riusabile,
+testabile. Una riga per pezzo, per esempio:
+
+  id        carrier
+  kind      Portaerei
+  l, w, h   voxel
+  mesh      boxes  oppure  gltf quando c'è il file
+  asset     null   oppure  assets/gltf/carrier.glb
+  reuse     stesso pezzo su kharg / gaza / hormuz
+
+I test possono smentire un inventario falso (pezzo noto assente, ordine
+CVN > DDG > patrol > carro > persona invertito, mesh gltf senza file).
+I metri/teatro restano in engine/theater.mjs.
+
+Il catalogo non finge i metri 1:1. Si può estendere (nuovi id, varianti,
+livelli, instancing). I make* in index.html possono continuare a disegnare
+i cubetti finché mesh=boxes; quando c'è un .glb, lo stesso id può puntare
+lì senza un secondo mondo.
+
+
+6. Asset, MagicaVoxel, Blender
+------------------------------
+Cartella prevista:
+
+  assets/vox/     .vox / riferimenti MagicaVoxel
+  assets/gltf/    .glb / .gltf da Blender o altro
+
+Oggi sono vuote: è un contratto, non un loader. Il salto visivo
+(modelli sagomati) è lo stesso engine che legge un altro mesh dal
+catalogo, con instancing e LOD se il numero di mezzi cresce.
+
+Per una pubblicazione, i cubetti attuali reggono Surface, LAN e (quando
+arriva) WebView Android. Mesh più modellate stanno in lancio se restano
+nello stesso catalogo, file compressi (meshopt/draco o equivalente),
+istancing, senza una seconda scena Blender di fianco ai voxel. Due
+pipeline piene su iGPU 16 GB e sullo stretto a 1,3 km/cella sono un
+peso, non una chiusura: si sceglie in base al device e al teatro.
+
+Blender, MagicaVoxel, glTF, cubetti: convivenza nel catalogo, non una
+religione.
+
+
+7. Pubblicazione e scalare
+--------------------------
+Percorso naturale:
+
+  A  HTML + cubetti + bus + teatri con reload     — pubblicabile ora
+  B  stesso catalogo, mesh gltf dove c'è il file  — salto visivo
+
+Il bus di default è loopback (127.0.0.1). In LAN: HORMUZ_HOST=0.0.0.0
+(nessuna auth: chi è in rete può POST /cmd). MCP resta stdio locale.
+
+Si può triplicare i mezzi, aggiungere teatri, estrarre moduli da
+index.html, alzare la griglia, streamare i chunk. L'efficienza è una
+preferenza di prodotto (Surface, telefono, un mondo in RAM), non un
+divieto di crescere.
+
+Navigazione attuale (tattica / orbita / possess) è risultata buona:
+se la vista cambia, conviene tenerla.
+
+
+8. Bus, voce, MCP
+-----------------
+ops.mjs elenca le op del bus. Server, MCP e applyCmd in pagina stanno
+allineati a quell'elenco.
+
+Voce: parse-voice.mjs → POST /voice. Testo non riconosciuto: HTTP 400,
+niente bomb di default.
+
+MCP: mcp-stdio/ (loop generico) + mcp-hormuz.mjs (adattatore). Config
+di progetto .grok/config.toml. I tre tool restano la superficie agente.
+
+Si possono aggiungere op, tool, teatri: si estende il catalogo e i test.
+
+
+9. Fotografia in git
+--------------------
+Due cose insieme, già scelte:
+
+  • inventario testato (catalogo + teatri + ops), così un numero falso
+    fa fallire npm test
+  • un tag su QUESTA working copy, dopo carta allineata e inventario,
+    es. snapshot-2026-09-05 — non il vecchio commit Kharg 0.2
+
+README, ARCH, AGENTS descrivono lo stato attuale (tre teatri, Gaza,
+plugin meteo, catalogo in arrivo). Questo foglio tiene il ragionamento.
+
+
+10. Cartella docs/ (normalizzata)
+---------------------------------
+  docs/README.md                 indice della carta
+  docs/CONSIDERAZIONI.txt        questo foglio
+  docs/superpowers/specs/        disegni
+  docs/superpowers/plans/        piani operativi (alcuni superati)
+
+In radice restano i fogli operativi corti: README.md, ARCH.md, AGENTS.md,
+VOICE.md, MDO.MD. Puntano qui per il quadro lungo.
+
+assets/ è il posto dei modelli. engine/ il posto di theater, geo, catalogo,
+plugin. theaters/ i mondi. test/ le prove.
+
+
+11. Aperto
+----------
+Niente "si fa solo così". Voxel o mesh, un HTML o moduli, Kharg o dieci
+teatri, cubetti o Blender, loopback o LAN, show da situation room o
+qualcos'altro: si scala. Questo foglio serve a ricordare dove siamo e
+perché le due scale non coincidono, non a chiudere strade.

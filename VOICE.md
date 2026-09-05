@@ -22,6 +22,11 @@ O MCP `hormuz_voice` con lo stesso `text`. I comandi già JSON vanno in `hormuz_
 | chiama la marina | `navy` |
 | artiglieria / barrage | `artillery` / `barrage` |
 | radar | `radar` |
+| apri il fuoco / battaglia | `battle` n=1 |
+| irn dal terreno / iraniani | `navy` side=irn |
+| farm in fiamme / civili | `oilfire` zone=farm |
+
+Testo non in tabella (e non nelle altre frasi del parser): **rifiutato** (`error: unrecognized`). Non diventa `bomb`. `POST /voice` risponde 400 e non accoda. `hormuz_voice` non torna successo.
 
 Coordinate opzionali: `80 90` nel testo.
 

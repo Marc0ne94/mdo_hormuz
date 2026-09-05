@@ -100,14 +100,23 @@ async function post(pathname, body) {
     body: JSON.stringify(body)
   });
   const t = await r.text();
-  try { return JSON.parse(t); } catch { return { ok: false, raw: t, http: r.status }; }
+  let parsed;
+  try { parsed = JSON.parse(t); }
+  catch { parsed = { ok: false, raw: t, http: r.status }; }
+  if (!r.ok || parsed.ok === false) {
+    throw new Error(parsed.error || parsed.raw || ("http " + r.status));
+  }
+  return parsed;
 }
 
 async function call(name, args) {
   args = args || {};
   if (name === "hormuz_status") {
-    const r = await fetch(BASE + "/status");
-    return r.json();
+    const r = await fetch(BASE + "/status", { signal: AbortSignal.timeout(4000) });
+    if (!r.ok) throw new Error("status http " + r.status);
+    const j = await r.json();
+    if (!j || j.ok === false) throw new Error("status not ok");
+    return j;
   }
   if (name === "hormuz_voice") return post("/voice", { text: args.text, src: "mcp" });
   if (name === "hormuz_cmd") return post("/cmd", { ...args, src: "mcp" });

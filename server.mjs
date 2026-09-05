@@ -7,6 +7,7 @@ import { OPS, SIDES, WEAPONS, VERSION, PRODUCT } from "./ops.mjs";
 
 const __dir = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.HORMUZ_PORT || 8765);
+const HOST = process.env.HORMUZ_HOST || "127.0.0.1";
 const sse = new Set();
 const log = [];
 let seq = 0;
@@ -51,7 +52,10 @@ function normalize(raw) {
   const who = raw.who != null ? String(raw.who).slice(0, 80) : "";
   const zone = raw.zone != null ? String(raw.zone).slice(0, 24) : "";
   if (!OPS.includes(op)) return { error: "unknown op", op };
-  return { op, src, n, x, z, r, side, weapon, who, zone, id: ++seq, ts: Date.now() };
+  const cmd = { op, src, n, x, z, r, side, weapon, who, zone, ts: Date.now() };
+  if (op !== "status") cmd.id = ++seq;
+  else cmd.id = seq;
+  return cmd;
 }
 
 const memDir = path.join(__dir, "memory");
@@ -120,10 +124,14 @@ const server = http.createServer(async (req, res) => {
     catch { send(res, 400, JSON.stringify({ error: "bad json" }), MIME[".json"]); return; }
     if (u.pathname === "/voice") {
       const parsed = parseVoice(raw.text || raw.q || "", raw.src || "voice");
+      if (parsed.error) {
+        send(res, 400, JSON.stringify({ ok: false, error: parsed.error, text: parsed.text }), MIME[".json"]);
+        return;
+      }
       raw = { ...raw, ...parsed, src: raw.src || parsed.src };
     }
     const cmd = normalize(raw);
-    if (cmd.error) { send(res, 400, JSON.stringify(cmd), MIME[".json"]); return; }
+    if (cmd.error) { send(res, 400, JSON.stringify({ ok: false, ...cmd }), MIME[".json"]); return; }
     if (cmd.op !== "status") {
       log.push(cmd);
       if (log.length > 200) log.shift();
@@ -148,6 +156,6 @@ setInterval(() => {
   remember({ op: "heartbeat", ts: Date.now(), clients: sse.size, seq });
 }, 60000);
 
-server.listen(PORT, "127.0.0.1", () => {
-  process.stderr.write(`${PRODUCT} ${VERSION}  http://127.0.0.1:${PORT}/\n`);
+server.listen(PORT, HOST, () => {
+  process.stderr.write(`${PRODUCT} ${VERSION}  http://${HOST}:${PORT}/\n`);
 });

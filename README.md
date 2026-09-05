@@ -1,6 +1,8 @@
-# KHARG 0.2
+# KHARG / HORMUZ 0.2
 
-Sandbox voxel dell’isola di Kharg. Bus di comandi + MCP. **Non è Ocra. Non è ABAP.**
+Sandbox voxel (Kharg, Gaza, Hormuz). Bus di comandi + MCP. Non è Ocra, non è ABAP.
+
+Carta: [docs/README.md](docs/README.md) · considerazioni: [docs/CONSIDERAZIONI.txt](docs/CONSIDERAZIONI.txt)
 
 ```
 avvia.cmd

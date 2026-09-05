@@ -6,16 +6,13 @@
  *   name, version, title?,
  *   tools: [{ name, description, inputSchema }],
  *   call(name, args): Promise<any>,
- *   ensure?: () => Promise<void>   // backend up; optional
+ *   ensure?: () => Promise<void>,  // backend up; optional; tools/call awaits it
+ *   input?, output?, log?          // default stdin/stdout/stderr
  * }
  */
 import { createInterface } from "readline";
 
 const PROTOCOL = "2024-11-05";
-
-function reply(obj) {
-  process.stdout.write(JSON.stringify(obj) + "\n");
-}
 
 function wrapOk(id, obj) {
   const text = typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
@@ -37,8 +34,15 @@ export function runStdioMcp(spec) {
   const tools = spec.tools || [];
   const call = spec.call;
   const ensure = spec.ensure;
+  const input = spec.input || process.stdin;
+  const output = spec.output || process.stdout;
+  const log = spec.log || process.stderr;
 
-  const rl = createInterface({ input: process.stdin });
+  function reply(obj) {
+    output.write(JSON.stringify(obj) + "\n");
+  }
+
+  const rl = createInterface({ input });
   rl.on("line", async (line) => {
     if (!line.trim()) return;
     let msg;
@@ -56,7 +60,7 @@ export function runStdioMcp(spec) {
             capabilities: { tools: {} }
           }
         });
-        if (ensure) ensure().catch((e) => process.stderr.write(name + ": " + e.message + "\n"));
+        if (ensure) ensure().catch((e) => log.write(name + ": " + e.message + "\n"));
         return;
       }
       if (method === "notifications/initialized" || method === "notifications/cancelled") return;
@@ -79,4 +83,10 @@ export function runStdioMcp(spec) {
       if (id != null) reply(wrapFail(id, e.message));
     }
   });
+
+  return {
+    close() {
+      rl.close();
+    }
+  };
 }

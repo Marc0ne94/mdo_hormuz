@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KHARG 0.2</title>
+  <title>KHARG CIC</title>
   <script type="importmap">
   {
     "imports": {
@@ -14,55 +14,75 @@
   </script>
   <style>
     :root {
-      --ink: #f3ead6;
-      --muted: #b7c4c2;
-      --gold: #e8a54b;
-      --crimson: #d4452a;
-      --teal: #3ec7c0;
-      --panel: rgba(8, 16, 22, 0.78);
+      --ink: #efe6d2;
+      --muted: #9a8f78;
+      --gold: #d4b06a;
+      --crimson: #c44532;
+      --teal: #4ec4b8;
+      --irn: #c45a3a;
+      --civ: #d4b06a;
+      --panel: rgba(8, 9, 10, 0.88);
+      --line: rgba(212, 176, 106, 0.28);
     }
-    html, body { margin: 0; height: 100%; overflow: hidden; background: #061018; font-family: "Segoe UI", "Trebuchet MS", sans-serif; color: var(--ink); }
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #070706; font-family: "Segoe UI", "Trebuchet MS", sans-serif; color: var(--ink); }
     #seatMask {
       display: none; position: fixed; inset: 0; z-index: 3; pointer-events: none;
       background: radial-gradient(ellipse at 50% 42%, transparent 38%, rgba(4, 8, 12, 0.62) 100%);
     }
     body.seated #seatMask { display: block; }
-    body.seated #roster, body.seated #stats, body.seated #bar, body.seated #clog { opacity: 0.18; }
+    body.seated #roster, body.seated #stats { opacity: 0.55; }
     body.seated #followMeter, body.seated #followHint { opacity: 1; }
-    body.seated #controls { opacity: 0.35; }
+    body.seated #deck { opacity: 1; }
     canvas { display: block; width: 100%; height: 100%; }
     #hud { position: fixed; inset: 0; pointer-events: none; z-index: 4; }
-    #hud * { pointer-events: auto; }
+    #hud .panel, #hud #deck, #hud #phase { pointer-events: auto; }
+    #hud::before, #hud::after {
+      content: ""; pointer-events: none; position: absolute; width: 28px; height: 28px;
+      border: 2px solid rgba(62,199,192,0.55); z-index: 5;
+    }
+    #hud::before { top: 52px; left: 8px; border-right: 0; border-bottom: 0; }
+    #hud::after { top: 52px; right: 8px; border-left: 0; border-bottom: 0; }
+    body.hotwar #phase {
+      background: #7a1810;
+      border-bottom-color: #ff4a32;
+      animation: freePulse 1.4s ease-in-out infinite;
+    }
+    @keyframes freePulse {
+      0%, 100% { background: #6a1410; }
+      50% { background: #a01c14; }
+    }
+    body.hotwar #hud::before, body.hotwar #hud::after { border-color: #ff6a4a; }
+    body.hotwar #tacRing { border-color: rgba(255, 80, 50, 0.45); }
     .panel {
-      position: absolute; background: var(--panel); border: 1px solid rgba(62, 199, 192, 0.28);
-      backdrop-filter: blur(7px); padding: 10px 14px; border-radius: 2px;
+      position: absolute; background: var(--panel); border: 1px solid var(--line);
+      backdrop-filter: blur(8px); padding: 8px 10px; border-radius: 0;
     }
     #roster {
-      top: 16px; left: 16px; bottom: 92px; width: min(300px, 34vw);
+      top: 56px; left: 12px; width: min(260px, 28vw); max-height: 48vh;
       display: flex; flex-direction: column; padding: 0; overflow: hidden;
     }
-    #roster header { padding: 10px 14px 6px; }
-    #roster h1 { margin: 0 0 2px; font-size: 20px; letter-spacing: 0.28em; font-weight: 600; color: var(--gold); text-transform: uppercase; }
-    #roster .sub { margin: 0; font-size: 11px; color: var(--muted); }
-    #roster .geo { font-size: 10px; color: var(--muted); padding: 0 14px 8px; line-height: 1.45; }
+    #roster header { padding: 10px 12px 4px; }
+    #roster h1 { margin: 0; font-size: 13px; letter-spacing: 0.28em; font-weight: 600; color: var(--gold); text-transform: uppercase; }
+    #roster .sub { margin: 3px 0 0; font-size: 10px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; }
+    #roster .geo { font-size: 10px; color: var(--muted); padding: 0 12px 8px; line-height: 1.4; }
     #rosterNav { overflow: auto; flex: 1; border-top: 1px solid rgba(62,199,192,0.18); }
     .sec h3 {
-      margin: 0; padding: 8px 14px 4px; font-size: 10px; letter-spacing: 0.18em;
+      margin: 0; padding: 6px 10px 2px; font-size: 9px; letter-spacing: 0.2em;
       text-transform: uppercase; color: var(--gold); font-weight: 600;
     }
     .unit {
-      display: grid; grid-template-columns: 1fr auto; gap: 2px 8px;
-      padding: 6px 14px; cursor: pointer; border-left: 3px solid transparent;
+      display: grid; grid-template-columns: 1fr auto; gap: 1px 8px;
+      padding: 4px 10px; cursor: pointer; border-left: 3px solid transparent;
     }
     .unit:hover, .unit.on { background: rgba(62, 199, 192, 0.12); border-left-color: var(--gold); }
-    .unit .nm { font-size: 12px; }
-    .unit .kd { font-size: 10px; color: var(--muted); grid-column: 1; }
+    .unit .nm { font-size: 11px; }
+    .unit .kd { font-size: 9px; color: var(--muted); grid-column: 1; }
     .unit .hpn { font-size: 10px; color: var(--muted); font-variant-numeric: tabular-nums; }
     .hp { grid-column: 1 / -1; height: 3px; background: #142830; }
     .hp i { display: block; height: 100%; width: 100%; background: var(--teal); }
     .unit.north .hp i { background: var(--crimson); }
     .unit.civ .hp i { background: var(--gold); }
-    #followHint { padding: 8px 14px; font-size: 11px; color: var(--gold); border-top: 1px solid rgba(62,199,192,0.18); min-height: 1.4em; }
+    #followHint { padding: 6px 10px; font-size: 10px; color: var(--gold); border-top: 1px solid rgba(62,199,192,0.18); }
     #labels { position: fixed; inset: 0; pointer-events: none; z-index: 3; }
     .glab {
       position: absolute; transform: translate(-50%, -130%);
@@ -73,41 +93,99 @@
       background: rgba(8,16,22,0.62); padding: 2px 7px;
     }
     .glab.city { color: var(--ink); border-color: rgba(62,199,192,0.45); }
-    #stats { top: 16px; right: 16px; text-align: right; font-variant-numeric: tabular-nums; font-size: 12px; line-height: 1.55; color: var(--muted); }
+    #stats { top: 56px; right: 12px; text-align: right; font-variant-numeric: tabular-nums; font-size: 11px; line-height: 1.45; color: var(--muted); min-width: 260px; }
+    #stats .kicker { font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; text-align: left; }
     #stats b { color: var(--ink); font-weight: 600; }
-    #clock { color: var(--gold); }
-    #minimap { display: block; width: 196px; height: 164px; margin: 8px 0 0 auto; border: 1px solid rgba(62,199,192,0.35); background: #0a1820; cursor: crosshair; image-rendering: pixelated; }
-    #followMeter { top: 16px; left: 50%; transform: translateX(-50%); min-width: 240px; text-align: center; font-size: 12px; display: none; }
+    #clock { color: var(--gold); font-size: 13px; letter-spacing: 0.08em; }
+    #minimap { display: block; width: 260px; height: 216px; margin: 8px 0 0 auto; border: 1px solid var(--line); background: #0a1820; cursor: crosshair; image-rendering: pixelated; }
+    body.tac #minimap { width: 300px; height: 250px; }
+    #followMeter { top: 56px; left: 50%; transform: translateX(-50%); min-width: 260px; text-align: center; font-size: 12px; display: none; }
     #followMeter b { color: var(--gold); }
-    #wx { font-size: 11px; color: var(--muted); margin-top: 4px; }
-    #clog {
-      position: absolute; right: 16px; bottom: 92px; width: 260px; max-height: 160px;
-      overflow: auto; font-size: 11px; line-height: 1.45; color: var(--muted);
+    #sitrep {
+      position: absolute; left: 50%; top: 58px; transform: translateX(-50%);
+      width: min(560px, 42vw); text-align: center; pointer-events: none; z-index: 6;
+    }
+    #sitrep .sit-k {
+      font-size: 9px; letter-spacing: 0.32em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px;
+    }
+    #sitLine {
+      font-size: 15px; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--gold); text-shadow: 0 2px 14px #000; line-height: 1.35;
+    }
+    body.hotwar #sitrep .sit-k { color: #ffb4a0; }
+    body.hotwar #sitLine { color: #ffd0c4; }
+    #wx { font-size: 10px; color: var(--muted); margin-top: 2px; }
+    #hud #clog {
+      position: absolute; left: 280px; right: 320px; bottom: 124px;
+      max-height: 72px; overflow: hidden; font-size: 12px; line-height: 1.45; color: var(--gold);
+      pointer-events: none; background: transparent; border: 0; padding: 0;
+    }
+    #hud #clog:empty { display: none; }
+    #clog div { border-bottom: 0; padding: 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #clog b { color: var(--gold); font-weight: 600; }
+    #controls { display: none; }
+    #deck {
+      position: absolute; left: 0; right: 0; bottom: 0;
+      display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 14px;
+      padding: 12px 16px 14px; background: linear-gradient(180deg, transparent, rgba(6,6,5,0.96) 22%);
+      border-top: 1px solid var(--line);
+    }
+    .grp { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+    .grp span {
+      font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted);
+    }
+    .grp.sea span { color: var(--teal); }
+    .grp.irn span { color: #e08a72; }
+    .grp.civ span { color: var(--gold); }
+    .grp.hot span { color: #e8a090; }
+    .row { display: flex; flex-wrap: wrap; gap: 5px; }
+    #deck input[type="text"] {
+      background: #12110e; color: var(--ink); border: 1px solid var(--line);
+      padding: 8px 10px; font: inherit; font-size: 13px;
+    }
+    #seedIn { width: 64px; }
+    #voiceIn { width: min(320px, 30vw); min-width: 180px; }
+    #deck button {
+      background: #16140f; color: var(--ink); border: 1px solid var(--line);
+      padding: 8px 12px; font: inherit; font-size: 12px; cursor: pointer; letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    #deck button:hover { background: #2a2418; }
+    #deck button.hot { border-color: var(--crimson); color: #ffc8b4; }
+    #deck button.on { background: #2a2418; border-color: var(--gold); color: var(--gold); }
+    #phase {
+      position: absolute; left: 0; right: 0; top: 0; transform: none;
+      height: 48px; display: flex; align-items: center; justify-content: space-between;
+      gap: 18px; padding: 0 18px;
+      background: rgba(8, 8, 7, 0.92); border-bottom: 1px solid var(--line);
+      letter-spacing: 0.12em; text-transform: uppercase; font-size: 12px; color: var(--gold);
       pointer-events: none;
     }
-    #clog div { border-bottom: 1px solid rgba(62,199,192,0.12); padding: 3px 0; }
-    #clog b { color: var(--gold); font-weight: 600; }
-    #controls { bottom: 16px; left: 16px; font-size: 11px; color: var(--muted); line-height: 1.5; max-width: min(300px, 34vw); }
-    #controls kbd { display: inline-block; min-width: 1.1em; padding: 0 4px; border: 1px solid rgba(232,165,75,0.45); color: var(--gold); font-family: inherit; font-size: 10px; }
-    #bar { bottom: 16px; right: 16px; display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; max-width: 460px; }
-    #bar input[type="text"] {
-      width: 72px; background: #102028; color: var(--ink); border: 1px solid rgba(62,199,192,0.4);
-      padding: 6px 8px; font: inherit; font-size: 13px;
+    #phase .ban-l { display: flex; flex-direction: column; gap: 2px; min-width: 180px; }
+    #phase .kicker { font-size: 9px; letter-spacing: 0.28em; color: var(--muted); }
+    #phase .ban-title { font-size: 14px; letter-spacing: 0.34em; color: var(--gold); }
+    #phase .ban-c { display: flex; align-items: center; gap: 22px; }
+    #posture { font-size: 16px; letter-spacing: 0.32em; color: var(--gold); font-weight: 700; }
+    body.hotwar #posture { color: #fff0e8; text-shadow: 0 0 12px #ff4a32; }
+    #phase .forces { display: flex; gap: 18px; }
+    #phase .f { display: flex; flex-direction: column; align-items: center; min-width: 48px; }
+    #phase .f span { font-size: 9px; letter-spacing: 0.2em; color: var(--muted); }
+    #phase .f b { font-size: 20px; font-variant-numeric: tabular-nums; line-height: 1; }
+    #phase .f.us b { color: var(--teal); }
+    #phase .f.irn b { color: #e08a72; }
+    #phase .f.civ b { color: var(--gold); }
+    #phase .ban-r { text-align: right; min-width: 160px; }
+    #phase span { letter-spacing: 0.06em; color: var(--muted); font-size: 11px; text-transform: none; }
+    .glab.spot { font-size: 11px; letter-spacing: 0.22em; }
+    .glab.us { color: #3ec7c0; border-color: #3ec7c0; background: rgba(8,30,32,0.78); }
+    .glab.irn { color: #ff8a6a; border-color: #d4452a; background: rgba(32,10,8,0.78); }
+    #tacRing {
+      display: none; position: fixed; inset: 56px 328px 136px 280px; z-index: 3; pointer-events: none;
+      border: 1px solid rgba(212,176,106,0.22); box-shadow: inset 0 0 48px rgba(0,0,0,0.25);
     }
-    #bar button {
-      background: #16303a; color: var(--ink); border: 1px solid rgba(62,199,192,0.4);
-      padding: 6px 10px; font: inherit; font-size: 12px; cursor: pointer;
-    }
-    #bar button:hover { background: #1e4650; }
-    #bar button.hot { border-color: var(--crimson); color: #ffc8b4; }
-    #phase {
-      position: absolute; left: 50%; bottom: 72px; transform: translateX(-50%);
-      pointer-events: none; text-align: center; letter-spacing: 0.22em; text-transform: uppercase;
-      font-size: 11px; color: var(--gold); text-shadow: 0 1px 10px #000;
-    }
-    #phase span { display: block; letter-spacing: 0.04em; color: var(--muted); font-size: 12px; margin-top: 4px; text-transform: none; }
+    body.tac #tacRing { display: block; }
     #loader {
-      position: fixed; inset: 0; z-index: 10; background: #061018; display: flex; flex-direction: column;
+      position: fixed; inset: 0; z-index: 10; background: #04080a; display: flex; flex-direction: column;
       align-items: center; justify-content: center; gap: 14px;
     }
     #loader h2 { margin: 0; letter-spacing: 0.34em; text-transform: uppercase; color: var(--gold); font-weight: 600; font-size: 22px; }
@@ -126,68 +204,132 @@
   </div>
   <div id="labels"></div>
   <div id="seatMask"></div>
+  <div id="tacRing"></div>
   <div id="hud" style="display:none">
+    <div id="phase">
+      <div class="ban-l">
+        <div class="kicker">Situation room · sandbox</div>
+        <div class="ban-title" id="theaterTitle">Theater Kharg</div>
+      </div>
+      <div class="ban-c">
+        <div id="posture">HOLD</div>
+        <div class="forces">
+          <div class="f us"><span id="lblUs">US</span><b id="forceUs">—</b></div>
+          <div class="f irn"><span id="lblIrn">IRN</span><b id="forceIrn">—</b></div>
+          <div class="f civ"><span id="lblCiv">CIV</span><b id="forceCiv">—</b></div>
+        </div>
+      </div>
+      <div class="ban-r">
+        <div id="clock">—</div>
+        <div id="wx">—</div>
+      </div>
+    </div>
     <div class="panel" id="roster">
       <header>
-        <h1>Kharg</h1>
-        <p class="sub">Sandbox · isola · bus comandi</p>
+        <h1>Order of battle</h1>
+        <p class="sub">Assets on the board</p>
       </header>
-      <div class="geo" id="geoNote">Ovest golfo (SEA) · Isola Kharg (IRN) · Est costa (LAND)</div>
+      <div class="geo" id="geoNote">US FLEET west gulf · IRN TERRAIN island</div>
       <div id="rosterNav"></div>
-      <div id="followHint">Clicca un mezzo per seguirlo</div>
+      <div id="followHint">Select an asset · M tactical</div>
     </div>
     <div class="panel" id="stats">
+      <div class="kicker">Sitmap</div>
       <div><b id="fps">—</b> fps · <b id="ms">—</b> ms</div>
-      <div><b id="vc">—</b> voxel</div>
-      <div><b id="dc">—</b> chunk</div>
-      <div><b id="q">1.00</b> qualità · gen <b id="genms">—</b> ms</div>
-      <div id="clock">Alba</div>
+      <div><b id="vc">—</b> voxel · <b id="dc">—</b> chunk</div>
+      <div>q <b id="q">1.00</b> · gen <b id="genms">—</b> ms</div>
       <div id="seedlbl">seed 1622</div>
-      <div id="wx">vento —</div>
-      <canvas id="minimap" width="196" height="164"></canvas>
+      <canvas id="minimap" width="260" height="216"></canvas>
     </div>
     <div class="panel" id="followMeter">
       <div><b id="fmName">—</b></div>
       <div id="fmMeta">prua — · nodi — · scafo —</div>
     </div>
-    <div class="panel" id="controls">
-      <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> muovi · <kbd>Q</kbd><kbd>E</kbd> su/giù · trascina orbita · rotella zoom</div>
-      <div><kbd>R</kbd> rigenera · <kbd>P</kbd> pausa · <kbd>T</kbd> tempo · <kbd>C</kbd> cinema · <kbd>M</kbd> tattica · <kbd>G</kbd> colpo · 1–9 segui · click mezzo</div>
+    <div id="sitrep">
+      <div class="sit-k">Sitrep</div>
+      <div id="sitLine">HOLD · theater quiet</div>
     </div>
-    <div class="panel" id="bar">
-      <input id="seedIn" type="text" value="1622" maxlength="12" />
-      <button id="btnGo" type="button">Alza</button>
-      <button id="btnDawn" type="button">Alba</button>
-      <button id="btnNoon" type="button">Mezzogiorno</button>
-      <button id="btnDusk" type="button">Tramonto</button>
-      <button id="btnNight" type="button">Notte</button>
-      <button id="btnPause" type="button">Pausa</button>
-      <button id="btnCine" type="button">Cinema</button>
-      <button id="btnMap" type="button">Tattica</button>
-      <button id="btnStrike" class="hot" type="button">Colpo</button>
-      <button id="btnBomb" class="hot" type="button">Bomb</button>
-      <button id="btnNavy" type="button">Navy</button>
-      <button id="btnArty" type="button">Artillery</button>
-      <button id="btnAir" type="button">Air</button>
-      <button id="btnBattle" type="button">Battaglia</button>
-      <button id="btnDrop" type="button">Paradrop</button>
-      <input id="voiceIn" type="text" placeholder="spara missile · carro dal cielo · prendi portaerei" maxlength="120" style="min-width:220px;flex:1" />
-    </div>
-    <div id="phase">Kharg sandbox<span id="phased">SEA dal golfo · LAND dalla costa · IRN sull'isola</span></div>
+    <div class="panel" id="controls"></div>
     <div class="panel" id="clog"></div>
+    <div id="deck">
+      <div class="grp">
+        <span>directive</span>
+        <div class="row">
+          <input id="voiceIn" type="text" placeholder="spara missile · irn dal terreno · farm in fiamme" maxlength="120" />
+          <button id="btnVoice" type="button">Send</button>
+        </div>
+      </div>
+      <div class="grp sea">
+        <span id="stSea">US station</span>
+        <div class="row">
+          <button id="btnNavy" type="button">Navy</button>
+          <button id="btnAir" type="button">Air</button>
+          <button id="btnLaunch" type="button">Catapult</button>
+          <button id="btnCruise" type="button">Cruise</button>
+        </div>
+      </div>
+      <div class="grp irn">
+        <span id="stIrn">IRN station</span>
+        <div class="row">
+          <button id="btnIrn" type="button">IRN+</button>
+          <button id="btnHeli" type="button">Heli</button>
+          <button id="btnLand" type="button">Coast</button>
+          <button id="btnDrop" type="button">Drop</button>
+        </div>
+      </div>
+      <div class="grp civ">
+        <span>effects</span>
+        <div class="row">
+          <button id="btnOil" class="hot" type="button">Oil</button>
+          <button id="btnFarm" class="hot" type="button">Farm</button>
+          <button id="btnArty" type="button">Arty</button>
+          <button id="btnBomb" class="hot" type="button">Bomb</button>
+        </div>
+      </div>
+      <div class="grp hot">
+        <span>authority</span>
+        <div class="row">
+          <button id="btnStrike" class="hot" type="button">Fire</button>
+          <button id="btnBattle" type="button">Free</button>
+        </div>
+      </div>
+      <div class="grp">
+        <span>view</span>
+        <div class="row">
+          <button id="btnMap" type="button">Tactical</button>
+          <button id="btnCine" type="button">Brief</button>
+          <button id="btnPause" type="button">Hold time</button>
+          <button id="btnTKharg" type="button">Kharg</button>
+          <button id="btnTHormuz" type="button">Hormuz</button>
+          <button id="btnTGaza" type="button">Gaza</button>
+          <button id="btnDawn" type="button">Dawn</button>
+          <button id="btnNoon" type="button">Noon</button>
+          <button id="btnDusk" type="button">Dusk</button>
+          <button id="btnNight" type="button">Night</button>
+          <button id="btnRain" type="button">Rain</button>
+          <input id="seedIn" type="text" value="1622" maxlength="12" />
+          <button id="btnGo" type="button">Rebuild</button>
+        </div>
+      </div>
+    </div>
   </div>
   <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { parseVoice } from './parse-voice.mjs';
+import { getTheater, listTheaters } from './engine/theater.mjs';
+import { weather } from './engine/plugins/weather.mjs';
+import { layerAt } from './engine/geo.mjs';
 
 window.addEventListener('error', (e) => { window.__HERR = (e.message || '') + ' @' + (e.filename || '') + ':' + e.lineno; });
 window.addEventListener('unhandledrejection', (e) => { window.__HERR = String(e.reason && e.reason.stack || e.reason); });
 
-const W = 192, D = 160, H = 64, CS = 32;
+const THEATER_ID = (new URLSearchParams(location.search).get('t') || 'kharg').toLowerCase();
+const THEATER = getTheater(THEATER_ID);
+const W = THEATER.grid.w, D = THEATER.grid.d, H = THEATER.grid.h, CS = THEATER.grid.cs;
 const NX = W / CS, NZ = D / CS, NY = H / CS;
-const WATER_Y = 12;
+const WATER_Y = THEATER.grid.waterY;
 const MAX_NPC = 420, MAX_DEBRIS = 320, MAX_PROJ = 160, MAX_PART = 2200;
 
 const PERF = {
@@ -363,37 +505,32 @@ function groundY(x, z) {
   const iz = Math.max(0, Math.min(D - 1, z | 0));
   return (surf[ix + iz * W] || 0) + 1;
 }
-const LON0 = 50.05, LON1 = 50.62, LATN = 29.40, LATS = 29.08;
+const LON0 = THEATER.bounds.lon0, LON1 = THEATER.bounds.lon1, LATN = THEATER.bounds.latN, LATS = THEATER.bounds.latS;
 function xz(lon, lat) {
   return [
     ((lon - LON0) / (LON1 - LON0)) * (W - 1),
     ((LATN - lat) / (LATN - LATS)) * (D - 1)
   ];
 }
-const GEO = {
-  kharg: { lon: 50.310, lat: 29.245, name: 'Kharg', kind: 'island' },
-  khargu: { lon: 50.310, lat: 29.30, name: 'Khargu', kind: 'island' },
-  seaIsland: { lon: 50.27, lat: 29.245, name: 'Sea Island', kind: 'city' },
-  seJetty: { lon: 50.34, lat: 29.22, name: 'T-Jetty SE', kind: 'city' },
-  tankFarm: { lon: 50.31, lat: 29.25, name: 'Tank farm', kind: 'city' },
-  runway: { lon: 50.318, lat: 29.24, name: 'Pista', kind: 'city' },
-  ganaveh: { lon: 50.52, lat: 29.58, name: 'Ganaveh', kind: 'city' },
-  bushehr: { lon: 50.84, lat: 28.97, name: 'verso Bushehr', kind: 'city' },
-  mainland: { lon: 50.55, lat: 29.24, name: 'Costa Bushehr', kind: 'city' },
-  tss: { lon: 50.22, lat: 29.20, name: 'Golfo ovest', kind: 'city' },
-  hormuz: { lon: 50.310, lat: 29.245, name: 'Kharg', kind: 'island' }
-};
-for (const g of Object.values(GEO)) {
-  const p = xz(g.lon, g.lat);
-  g.x = Math.max(4, Math.min(W - 5, p[0]));
-  g.z = Math.max(4, Math.min(D - 5, p[1]));
-}
+function kmToVx(km) { return (km / THEATER.span.kmE) * (W - 1); }
+function kmToVz(km) { return (km / THEATER.span.kmN) * (D - 1); }
+const GEO = { ...THEATER.geo };
+GEO.usSpot = THEATER.spots.us;
+GEO.irnSpot = THEATER.spots.irn;
 function mainlandX(z) {
+  if (THEATER.lanes && THEATER.lanes.mainlandX != null) {
+    return THEATER.lanes.mainlandX * (W - 1) + Math.sin(z * 0.04) * 7;
+  }
   return 156 + Math.sin(z * 0.04) * 7 + (fbm(z * 0.03, 4, 3, 2) - 0.5) * 4;
 }
 function iranCoast(x) { return 8; }
 function musandamCoast(x) { return D - 8; }
-function channelZ(x) { return 88 + Math.sin(x * 0.03) * 6; }
+function channelZ(x) {
+  if (THEATER.lanes && THEATER.lanes.channelZ != null) {
+    return THEATER.lanes.channelZ * (D - 1) + Math.sin(x * 0.03) * 6;
+  }
+  return 88 + Math.sin(x * 0.03) * 6;
+}
 function channelHalf(x) { return 40; }
 function inLong(x, z, cx, cz, rx, rz) {
   const dx = Math.max(0, Math.abs(x - cx) - Math.max(0, rx - rz));
@@ -545,12 +682,142 @@ function islandLong(hm, cx, cz, rx, rz, h) {
   }
 }
 
+function lonLat(x, z) {
+  return [
+    LON0 + (x / (W - 1)) * (LON1 - LON0),
+    LATN - (z / (D - 1)) * (LATN - LATS)
+  ];
+}
+
+async function generateMaskWorld(onp) {
+  onp(8, THEATER.bootLine);
+  await new Promise((r) => requestAnimationFrame(r));
+  const hm = new Float32Array(W * D);
+  const layer = new Uint8Array(W * D);
+  const hasPoly = !!(THEATER.polys && THEATER.polys.strip);
+  const flat = THEATER.id === 'gaza';
+  hm.fill(WATER_Y - 6);
+  if (hasPoly) {
+    for (let z = 0; z < D; z++) {
+      for (let x = 0; x < W; x++) {
+        const ll = lonLat(x, z);
+        const ly = layerAt(THEATER, ll[0], ll[1]);
+        const i = x + z * W;
+        if (ly === 'strip') {
+          layer[i] = 1;
+          hm[i] = WATER_Y + (flat ? 2 : 6) + (flat ? 0 : fbm(x * 0.04, z * 0.04, 2, 1));
+        } else if (ly === 'israel') {
+          layer[i] = 2;
+          hm[i] = WATER_Y + (flat ? 3 : 8) + fbm(x * 0.05, z * 0.05, 2, 3) * (flat ? 1.2 : 4);
+        } else if (ly === 'egypt') {
+          layer[i] = 3;
+          hm[i] = WATER_Y + 3 + fbm(x * 0.04, z * 0.04, 2, 5);
+        }
+      }
+    }
+  }
+  for (const land of THEATER.land || []) {
+    const [cx, cz] = xz(land.lon, land.lat);
+    const rx = Math.max(2, kmToVx(land.rxKm));
+    const rz = Math.max(2, kmToVz(land.rzKm));
+    const x0 = Math.max(0, (cx - rx) | 0), x1 = Math.min(W - 1, (cx + rx) | 0);
+    const z0 = Math.max(0, (cz - rz) | 0), z1 = Math.min(D - 1, (cz + rz) | 0);
+    for (let z = z0; z <= z1; z++) {
+      for (let x = x0; x <= x1; x++) {
+        const u = (x - cx) / rx, v = (z - cz) / rz;
+        const d2 = u * u + v * v;
+        if (d2 > 1) continue;
+        const h = WATER_Y + 1 + (land.h || 6) * (1 - d2) + fbm(x * 0.03, z * 0.03, 3, 2) * 2;
+        const i = x + z * W;
+        if (h > hm[i]) hm[i] = h;
+      }
+    }
+  }
+  onp(28, 'Rilievo…');
+  for (let z = 0; z < D; z++) {
+    for (let x = 0; x < W; x++) {
+      const h = Math.max(1, Math.min(H - 2, hm[x + z * W] | 0));
+      const ly = layer[x + z * W];
+      const land = h >= WATER_Y;
+      for (let y = 0; y <= h; y++) {
+        let t = STONE;
+        if (y === h) t = ly === 1 ? SAND : ly === 2 ? OCHRE : ly === 3 ? SAND : (h > WATER_Y + 8 ? OCHRE : SAND);
+        else if (y > h - 2) t = DIRT;
+        set(x, y, z, t);
+      }
+      if (h < WATER_Y) {
+        for (let y = h + 1; y <= WATER_Y; y++) set(x, y, z, WATER);
+      }
+      surf[x + z * W] = h < WATER_Y ? WATER_Y : h;
+      if (land && h <= WATER_Y + 2) beachN.push(x, h + 1, z);
+    }
+    if ((z & 15) === 0) {
+      onp(28 + (z / D) * 40, 'Rilievo…');
+      await new Promise((r) => requestAnimationFrame(r));
+    }
+  }
+  onp(74, 'Città…');
+  const stamp = (p, r, pal) => {
+    if (!p) return;
+    const gx = p.x | 0, gz = p.z | 0;
+    const gy = groundY(gx, gz);
+    if (gy <= WATER_Y) return;
+    const n = Math.max(4, (r * r * 0.35) | 0);
+    for (let i = 0; i < n; i++) {
+      const x = gx + ((rng() - 0.5) * r) | 0;
+      const z = gz + ((rng() - 0.5) * r) | 0;
+      if (x < 2 || z < 2 || x > W - 3 || z > D - 3) continue;
+      const y = groundY(x, z);
+      if (y <= WATER_Y) continue;
+      fillBox(x, y + 1, z, 2 + (rng() * 2) | 0, 2 + (rng() * 3) | 0, 2 + (rng() * 2) | 0, pal[i % pal.length]);
+    }
+  };
+  if (THEATER.id === 'gaza') {
+    stamp(GEO.gazaCity, 7, [CONCRETE, WHITE, OCHRE]);
+    stamp(GEO.jabalia, 5, [CONCRETE, WHITE]);
+    stamp(GEO.khanYunis, 6, [CONCRETE, OCHRE]);
+    stamp(GEO.rafah, 5, [CONCRETE, SAND]);
+    stamp(GEO.deir, 4, [WHITE, CONCRETE]);
+    stamp(GEO.nuseirat, 4, [CONCRETE, OCHRE]);
+    stamp(GEO.ashkelon, 6, [WHITE, CONCRETE, LIME]);
+    stamp(GEO.sderot, 3, [WHITE, CONCRETE]);
+    stamp(GEO.netivot, 3, [WHITE, OCHRE]);
+    stamp(GEO.ashdod, 8, [WHITE, CONCRETE, STEEL, LIME]);
+    stamp(GEO.beerSheva, 8, [OCHRE, CONCRETE, WHITE, LIME]);
+    stamp(GEO.kiryatGat, 5, [WHITE, CONCRETE, OCHRE]);
+    stamp(GEO.ofakim, 4, [OCHRE, WHITE]);
+    const a = GEO.rafah, b = GEO.beitHanoun;
+    if (a && b) {
+      const steps = 48;
+      for (let i = 0; i <= steps; i++) {
+        const x = (a.x + (b.x - a.x) * (i / steps)) | 0;
+        const z = (a.z + (b.z - a.z) * (i / steps)) | 0;
+        const y = groundY(x, z);
+        if (y > WATER_Y) fillBox(x, y, z, 1, 1, 1, ASPHALT);
+      }
+    }
+    const pt = GEO.seJetty;
+    if (pt) fillBox(pt.x | 0, WATER_Y, pt.z | 0, 4, 1, 2, CONCRETE);
+  }
+  onp(88, 'Luoghi…');
+  for (const p of Object.values(THEATER.geo)) {
+    const gx = p.x | 0, gz = p.z | 0;
+    if (gx < 5 || gz < 5 || gx > W - 6 || gz > D - 6) continue;
+    const gy = groundY(gx, gz);
+    if (gy > WATER_Y) fillBox(gx, gy, gz, 2, 2, 2, CONCRETE);
+  }
+}
+
 async function generateWorld(s, onp) {
   seed = s | 0 || 1622;
   rng = mulberry32(seed);
   data.fill(0); surf.fill(0); voxelCount = 0;
   flares.length = 0; lights.length = 0; windows.length = 0;
   spawnN.length = 0; spawnS.length = 0; beachN.length = 0; beachS.length = 0;
+  if (THEATER.generator === 'mask') {
+    await generateMaskWorld(onp);
+    return;
+  }
 
   onp(6, 'Alzando Kharg dal golfo…');
   await new Promise((r) => requestAnimationFrame(r));
@@ -900,24 +1167,24 @@ renderer.setPixelRatio(Math.min(devicePixelRatio, 1.25));
 renderer.setSize(innerWidth, innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
+renderer.toneMappingExposure = 1.18;
 renderer.setClearColor(0x6a8aa0, 1);
 document.body.prepend(renderer.domElement);
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x7aa0b4);
-scene.fog = new THREE.FogExp2(0x6a9088, 0.0062);
+scene.fog = new THREE.FogExp2(0x6a9088, 0.0044);
 scene.add(chunkGroup);
 
-const camera = new THREE.PerspectiveCamera(54, innerWidth / innerHeight, 0.4, 520);
-camera.position.set(GEO.kharg.x - 38, 26, GEO.kharg.z + 42);
+const camera = new THREE.PerspectiveCamera(54, innerWidth / innerHeight, 0.4, 720);
+camera.position.set(GEO.kharg.x - 22, 72, GEO.kharg.z + 78);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.06;
-controls.target.set(GEO.kharg.x, 12, GEO.kharg.z);
+controls.target.set(GEO.kharg.x, 14, GEO.kharg.z);
 controls.maxPolarAngle = Math.PI * 0.49;
 controls.minDistance = 6;
-controls.maxDistance = 260;
+controls.maxDistance = 280;
 
 const hemi = new THREE.HemisphereLight(0xc8dce8, 0x4a3020, 0.55);
 scene.add(hemi);
@@ -941,6 +1208,54 @@ for (let i = 0; i < 8; i++) {
   const p = new THREE.PointLight(0xffae42, 0, 14, 2);
   scene.add(p);
   lampLights.push(p);
+}
+let skyFlash = 0;
+const boomGeo = new THREE.SphereGeometry(1.15, 8, 6);
+const boomLights = [];
+for (let i = 0; i < 4; i++) {
+  const L = new THREE.PointLight(0xff7a28, 0, 48, 1.05);
+  scene.add(L);
+  const ball = new THREE.Mesh(boomGeo, new THREE.MeshBasicMaterial({
+    color: 0xffc070, transparent: true, opacity: 0, depthWrite: false, fog: false, toneMapped: false
+  }));
+  ball.visible = false;
+  ball.renderOrder = 6;
+  scene.add(ball);
+  boomLights.push({ L, ball, t: 0, life: 0.01, peak: 0 });
+}
+function flashBoom(x, y, z, r) {
+  let slot = boomLights[0];
+  for (const s of boomLights) if (s.t < slot.t) slot = s;
+  const night = look === 'night';
+  const tac = camMode === 'tac';
+  slot.L.position.set(x, y + (night ? 7 : 2.2), z);
+  slot.peak = night ? (tac ? 18 : 12) + r * 3 : 2.4;
+  slot.L.intensity = slot.peak;
+  slot.L.distance = night ? (tac ? 120 : 70) + r * 10 : 18 + r * 4;
+  slot.life = night ? 0.9 : 0.22;
+  slot.t = slot.life;
+  slot.ball.position.set(x, y + 3.4, z);
+  slot.ball.scale.setScalar(night ? 4.2 + r : 1.5);
+  slot.ball.material.opacity = night ? 0.95 : 0.4;
+  slot.ball.visible = true;
+  if (night) skyFlash = Math.min(1.35, skyFlash + 0.5 + r * 0.1);
+}
+function updateBoomLights(dt) {
+  skyFlash = Math.max(0, skyFlash - dt * 1.25);
+  for (const s of boomLights) {
+    if (s.t <= 0) {
+      s.L.intensity = 0;
+      s.ball.visible = false;
+      continue;
+    }
+    s.t -= dt;
+    const k = Math.max(0, s.t / s.life);
+    s.L.intensity = s.peak * k * k;
+    const night = look === 'night';
+    s.ball.scale.setScalar((night ? 4.4 : 1.6) * (1.35 - k * 0.35));
+    s.ball.material.opacity = (night ? 0.95 : 0.4) * k;
+    if (k <= 0) s.ball.visible = false;
+  }
 }
 
 const skyGeo = new THREE.SphereGeometry(1, 24, 16);
@@ -986,6 +1301,51 @@ function makeClouds() {
     g.userData.v = rf(0.4, 1.1);
     clouds.add(g);
   }
+}
+
+const RAIN_N = 520;
+let rainMesh = null;
+const rainFall = new Float32Array(RAIN_N);
+const rainDummy = new THREE.Object3D();
+function initRain() {
+  if (rainMesh) return;
+  const geo = new THREE.BoxGeometry(0.05, 1.6, 0.05);
+  const mat = new THREE.MeshBasicMaterial({ color: 0xa8b4c0, transparent: true, opacity: 0.42, depthWrite: false });
+  rainMesh = new THREE.InstancedMesh(geo, mat, RAIN_N);
+  rainMesh.frustumCulled = false;
+  rainMesh.visible = false;
+  scene.add(rainMesh);
+  for (let i = 0; i < RAIN_N; i++) rainFall[i] = Math.random() * 80;
+}
+function setRain(on) {
+  rainOn = !!on;
+  $('btnRain')?.classList.toggle('on', rainOn);
+  if (rainOn) { initRain(); combatLog('RAIN'); }
+  else combatLog('rain off');
+  if (rainMesh) rainMesh.visible = rainOn;
+}
+function updateRain(dt) {
+  if (!rainOn || !rainMesh) return;
+  if (PERF.quality < 0.5 && (PERF.frame & 1)) return;
+  const cam = camera.position;
+  const tgt = controls.target;
+  const ax = camMode === 'tac' ? tgt.x : cam.x;
+  const az = camMode === 'tac' ? tgt.z : cam.z;
+  const ay = camMode === 'tac' ? 38 : cam.y;
+  const span = camMode === 'tac' ? 78 : 36;
+  const spd = 48;
+  for (let i = 0; i < RAIN_N; i++) {
+    rainFall[i] -= spd * dt;
+    if (rainFall[i] < ay - 28) rainFall[i] = ay + 36 + Math.random() * 18;
+    rainDummy.position.set(
+      ax + (((i * 17) % 200) - 100) / 100 * span,
+      rainFall[i],
+      az + (((i * 29) % 200) - 100) / 100 * span
+    );
+    rainDummy.updateMatrix();
+    rainMesh.setMatrixAt(i, rainDummy.matrix);
+  }
+  rainMesh.instanceMatrix.needsUpdate = true;
 }
 
 const personGeo = makePersonGeo();
@@ -1057,8 +1417,16 @@ const partsMesh = new THREE.Points(partGeo, new THREE.PointsMaterial({
 scene.add(partsMesh);
 const parts = [];
 
+function fxCap() {
+  const q = PERF.quality;
+  return {
+    parts: Math.max(180, Math.min(MAX_PART, (380 + q * 700) | 0)),
+    debris: Math.max(48, Math.min(MAX_DEBRIS, (64 + q * 140) | 0)),
+    perBoom: q < 0.55 ? 8 : q < 0.8 ? 16 : 24
+  };
+}
 function spawnPart(x, y, z, vx, vy, vz, life, r, g, b) {
-  if (parts.length >= MAX_PART) parts.shift();
+  if (parts.length >= fxCap().parts) parts.shift();
   parts.push({ x, y, z, vx, vy, vz, life, max: life, r, g, b });
 }
 
@@ -1079,11 +1447,45 @@ function addNpc(type, x, z, side) {
 }
 
 function flagOn(g, x, y, z, hex) {
-  addBox(g, x, y + 0.4, z, 0.05, 1.6, 0.05, 0x2a2c2e);
-  const fl = addBox(g, x + 0.38, y + 0.95, z, 0.72, 0.42, 0.03, hex);
+  addBox(g, x, y + 0.5, z, 0.07, 2.4, 0.07, 0x1a1c1e);
+  const fl = addBox(g, x + 0.62, y + 1.45, z, 1.25, 0.72, 0.06, hex, { emissive: hex, emissiveIntensity: 0.7 });
   g.userData.flags = g.userData.flags || [];
   g.userData.flags.push(fl);
   return fl;
+}
+const spots = [];
+function makeSpot(x, z, hex, name, army) {
+  const g = new THREE.Group();
+  const y0 = Math.max(typeof groundY === 'function' ? groundY(x, z) : WATER_Y, WATER_Y) + 0.35;
+  const mat = new THREE.MeshBasicMaterial({ color: hex, transparent: true, opacity: 0.88, depthWrite: false, fog: false });
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(8.5, 0.42, 8, 28), mat);
+  ring.rotation.x = Math.PI / 2;
+  ring.position.y = y0;
+  g.add(ring);
+  const pole = new THREE.Mesh(UNIT_BOX, mat);
+  pole.scale.set(0.4, 16, 0.4);
+  pole.position.set(0, y0 + 8, 0);
+  g.add(pole);
+  const cap = new THREE.Mesh(UNIT_BOX, mat);
+  cap.scale.set(1.6, 1.6, 1.6);
+  cap.position.set(0, y0 + 16.2, 0);
+  g.add(cap);
+  g.position.set(x, 0, z);
+  scene.add(g);
+  const light = new THREE.PointLight(hex, 2.2, 48);
+  light.position.set(x, y0 + 8, z);
+  scene.add(light);
+  const s = { g, ring, cap, light, x, z, hex, name, army, y0 };
+  spots.push(s);
+  return s;
+}
+function updateSpots() {
+  for (const s of spots) {
+    const u = 0.82 + Math.sin(simTime * 2.4) * 0.18;
+    s.ring.scale.set(u, u, u);
+    s.cap.position.y = s.y0 + 16.2 + Math.sin(simTime * 3.1) * 0.7;
+    s.light.intensity = 1.5 + Math.sin(simTime * 2.4) * 0.9;
+  }
 }
 function makeTanker(x, z, heading) {
   const g = new THREE.Group();
@@ -1118,6 +1520,7 @@ function makeWarship(x, z, heading, side) {
   addBox(g, 5.4, 0.55, 0, 1.6, 0.55, 1.4, hull);
   addBox(g, 6.4, 0.62, 0, 0.9, 0.35, 0.8, 0x1a1c1e);
   addBox(g, 0.4, 0.95, 0, 8.4, 0.22, 2.05, 0x6a7278);
+  addBox(g, 0, 1.08, 0, 9.2, 0.1, 0.42, acc, { emissive: acc, emissiveIntensity: 0.55 });
   addBox(g, -0.8, 1.55, 0, 5.8, 1.35, 1.8, 0xb8b4aa);
   addBox(g, -2.1, 2.7, 0, 2.5, 1.5, 1.5, 0xe8e6de);
   addBox(g, -2.1, 3.7, 0, 0.9, 0.7, 0.9, 0x6a7278);
@@ -1143,6 +1546,7 @@ function makeCarrier(x, z, heading, side) {
   addBox(g, 0, 0.7, 0, 22, 1.15, 4.6, hull);
   addBox(g, 10.6, 0.75, 0, 2.4, 0.7, 2.6, hull);
   addBox(g, 0.2, 1.4, 0, 20.4, 0.22, 4.2, 0x3a4048);
+  addBox(g, 0, 1.55, 0, 19, 0.1, 0.55, acc, { emissive: acc, emissiveIntensity: 0.6 });
   addBox(g, -6.2, 2.6, 1.5, 4.2, 2.4, 1.4, 0xb8b4aa);
   addBox(g, -6.2, 4.1, 1.5, 1.2, 1.6, 0.7, acc);
   addBox(g, -6.2, 5.2, 1.5, 0.3, 1.4, 0.3, 0x6a7278);
@@ -1309,18 +1713,50 @@ function factionGroup(side) {
 function countSide(side) {
   return roster.filter((u) => u.alive && u.side === side).length;
 }
+function burstFromTerrain(x, z, n) {
+  const gy = (typeof groundY === 'function') ? groundY(x, z) : WATER_Y + 2;
+  const k = Math.min(n || 2, PERF.quality < 0.55 ? 1 : 2);
+  for (let i = 0; i < k; i++) {
+    explode(x + rf(-5, 5), gy + 2 + rng() * 3, z + rf(-5, 5), 2.1 + rng() * 0.8);
+  }
+}
+function spawnAirFromCloud(side) {
+  side = side || 'sea';
+  const x = side === 'land' ? 170 : side === 'irn' ? GEO.kharg.x + rf(-8, 8) : 16 + rng() * 10;
+  const z = 60 + rng() * 40;
+  const j = makeJet(x, z, side);
+  j.side = side;
+  j.y = 26 + rng() * 8;
+  register(j, { name: side.toUpperCase() + '-AIR ' + (roster.length + 1), kind: 'Jet', group: 'Aria', side, maxHp: 6 });
+  for (let i = 0; i < 8; i++) spawnPart(x, 28, z, rf(-1, 1), rf(-0.4, 0.2), rf(-1, 1), 0.8, 0.75, 0.8, 0.85);
+}
+function spawnCivBurst(n) {
+  n = Math.max(1, Math.min(4, n || 2));
+  const farm = GEO.tankFarm;
+  burstFromTerrain(farm.x, farm.z, n);
+  chainOil(farm.x, farm.z, 7);
+  if (rng() < 0.5) burstFromTerrain(GEO.seJetty.x, GEO.seJetty.z, 2);
+  const civ = roster.find((u) => u.alive && u.side === 'civ');
+  if (civ) {
+    const p = unitPos(civ);
+    explode(p.x, (p.y || WATER_Y) + 3, p.z, 2.4);
+  }
+  combatLog('civ · scoppio terreno');
+}
 function spawnSeaGroup(n) {
   n = Math.max(1, Math.min(3, n || 1));
   for (let i = 0; i < n; i++) {
-    const z = 64 + i * 14;
+    const z = 64 + i * 14 + rf(-4, 4);
     const s = makeWarship(16, z, Math.PI / 2, 'sea');
     s.dir = 1; s.homeZ = z; s.side = 'sea';
     register(s, { name: 'SEA-DDG ' + (roster.length + 1), kind: 'Cacciatorpediniere', group: 'Sea', side: 'sea', maxHp: 16 });
+    for (let k = 0; k < 10; k++) spawnPart(16, WATER_Y + 1, z, rf(-1.2, 1.2), rf(1, 3), rf(-1, 1), 0.7, 0.7, 0.85, 0.9);
   }
 }
 function spawnLandGroup(n) {
   n = n || 3;
   const mx = mainlandX(90);
+  burstFromTerrain(mx, 90, 2);
   for (let i = 0; i < n; i++) {
     const t = makeTruck(mx + 4 + rng() * 10, 50 + rng() * 70, 'north');
     t.lane = mx + 6; t.dir = rng() < 0.5 ? 1 : -1; t.side = 'land';
@@ -1332,17 +1768,21 @@ function spawnLandGroup(n) {
   p.dir = -1; p.laneOff = 16; p.side = 'land';
   register(p, { name: 'LAND-PAT ' + (roster.length + 1), kind: 'Pattuglia', group: 'Land', side: 'land', maxHp: 6 });
 }
-function spawnIrnGroup(n) {
-  n = Math.max(1, Math.min(2, n || 1));
+function spawnIrnGroup(n, opts) {
+  n = Math.max(1, Math.min(4, n || 2));
+  if (!opts || opts.burst !== false) burstFromTerrain(GEO.kharg.x, GEO.kharg.z, 2);
   for (let i = 0; i < n; i++) {
-    const hx = GEO.kharg.x - 22;
-    const s = makePatrol(hx, GEO.kharg.z + rf(-14, 14), 0, 'irn');
+    const hx = GEO.kharg.x + rf(-18, 8);
+    const hz = GEO.kharg.z + rf(-16, 16);
+    const s = makePatrol(hx, hz, rng() * 6.28, 'irn');
     s.dir = rng() < 0.5 ? 1 : -1; s.homeX = hx; s.homeZ = GEO.kharg.z; s.side = 'irn';
     register(s, { name: 'IRN-PAT ' + (roster.length + 1), kind: 'Pattuglia', group: 'Isola', side: 'irn', maxHp: 6 });
   }
   const sam = makeSam(GEO.kharg.x + rf(-8, 8), GEO.kharg.z + rf(-10, 10), 'irn');
   register(sam, { name: 'IRN-SAM ' + (roster.length + 1), kind: 'SAM', group: 'Isola', side: 'irn', maxHp: 9 });
   addNpc('infantry', GEO.kharg.x + rf(-6, 6), GEO.kharg.z + rf(-8, 8), 'north');
+  addNpc('infantry', GEO.kharg.x + rf(-6, 6), GEO.kharg.z + rf(-8, 8), 'north');
+  combatLog('IRN · dal terreno');
 }
 function spawnLife() {
   npcs.length = 0;
@@ -1352,8 +1792,23 @@ function spawnLife() {
   jets.forEach((j) => scene.remove(j.g)); jets.length = 0;
   uavs.forEach((u) => scene.remove(u.g)); uavs.length = 0;
   radars.forEach((r) => scene.remove(r.g)); radars.length = 0;
+  spots.forEach((s) => { scene.remove(s.g); scene.remove(s.light); }); spots.length = 0;
   wakes.length = 0; fires.length = 0;
   roster.length = 0; follow = null; rosterDirty = true;
+
+  makeSpot(GEO.usSpot.x, GEO.usSpot.z, 0x3ec7c0, GEO.usSpot.name || 'US FLEET', 'us');
+  makeSpot(GEO.irnSpot.x, GEO.irnSpot.z, 0xd4452a, GEO.irnSpot.name || 'IRN TERRAIN', 'irn');
+
+  const cv = makeCarrier(GEO.usSpot.x, GEO.usSpot.z, Math.PI / 2, 'sea');
+  cv.homeZ = GEO.usSpot.z;
+  register(cv, { name: 'SEA-CVN 1', kind: 'Portaerei', group: 'Sea', side: 'sea', maxHp: 40 });
+  spawnSeaGroup(3);
+
+  if (THEATER.id === 'gaza') {
+    spawnGazaSiege();
+    buildRoster(true);
+    return;
+  }
 
   const t1 = makeTanker(24, 70, Math.PI / 2);
   t1.dir = 1; t1.homeZ = 70;
@@ -1362,15 +1817,12 @@ function spawnLife() {
   t2.dir = -1; t2.homeZ = 102;
   register(t2, { name: 'VLCC outbound', kind: 'Petroliera', group: 'Isola', side: 'civ', maxHp: 28 });
 
-  const cv = makeCarrier(22, 86, Math.PI / 2, 'sea');
-  cv.homeZ = 86;
-  register(cv, { name: 'SEA-CVN 1', kind: 'Portaerei', group: 'Sea', side: 'sea', maxHp: 40 });
-  spawnSeaGroup(2);
-
   const mx = mainlandX(90);
   const tr = makeTruck(mx + 6, 88, 'north');
   tr.lane = mx + 6; tr.side = 'land';
   register(tr, { name: 'LAND-COL 1', kind: 'Colonna', group: 'Land', side: 'land', maxHp: 4 });
+  const a0 = makeArty(mx + 8, 78, 'land');
+  register(a0, { name: 'LAND-ART 1', kind: 'Artiglieria', group: 'Land', side: 'land', maxHp: 8 });
 
   const p1 = makePatrol(GEO.kharg.x - 22, GEO.kharg.z - 12, 0, 'irn');
   p1.dir = 1; p1.homeX = GEO.kharg.x - 22; p1.homeZ = GEO.kharg.z; p1.side = 'irn';
@@ -1382,15 +1834,68 @@ function spawnLife() {
   const rd = makeRadar(GEO.kharg.x + 4, GEO.kharg.z - 10, 'irn');
   rd.side = 'irn';
   register(rd, { name: 'IRN-RAD Kharg', kind: 'Radar', group: 'Isola', side: 'irn', maxHp: 10 });
+  const sam0 = makeSam(GEO.kharg.x + 6, GEO.kharg.z + 8, 'irn');
+  register(sam0, { name: 'IRN-SAM 1', kind: 'SAM', group: 'Isola', side: 'irn', maxHp: 9 });
+  const h0 = makeHeli(GEO.kharg.x - 8, GEO.kharg.z + 4, 'irn');
+  h0.side = 'irn';
+  register(h0, { name: 'IRN-HEL 1', kind: 'Elicottero', group: 'Aria', side: 'irn', maxHp: 8 });
+  const j0 = makeJet(GEO.usSpot.x, GEO.usSpot.z + 10, 'sea');
+  j0.side = 'sea';
+  register(j0, { name: 'SEA-AIR 1', kind: 'Jet', group: 'Aria', side: 'sea', maxHp: 6 });
 
   for (let i = 0; i < 8; i++) addNpc('crew', GEO.kharg.x + rf(-6, 6), GEO.kharg.z + rf(-8, 8), 'north');
   buildRoster(true);
 }
 
-let dayPhase = 0.22;
+function spawnGazaSiege() {
+  const isr = [GEO.sderot, GEO.ashkelon, GEO.netivot, GEO.zikim, GEO.ashdod, GEO.beerSheva, GEO.kiryatGat].filter(Boolean);
+  isr.forEach((p, i) => {
+    const a = makeArty(p.x + rf(-4, 4), p.z + rf(-4, 4), 'land');
+    register(a, { name: 'ISR-ART ' + (i + 1), kind: 'Artiglieria', group: 'Land', side: 'land', maxHp: 8 });
+    const t = makeTruck(p.x + 3, p.z, 'north');
+    t.lane = p.x; t.side = 'land';
+    register(t, { name: 'ISR-COL ' + (i + 1), kind: 'Colonna', group: 'Land', side: 'land', maxHp: 4 });
+  });
+  (THEATER.dome || []).forEach((d) => {
+    const [x, z] = xz(d.lon, d.lat);
+    const s = makeSam(x, z, 'land');
+    s.dome = true;
+    s.cool = rf(0.2, 1.2);
+    register(s, { name: d.name, kind: 'Cupola', group: 'Land', side: 'land', maxHp: 10 });
+    const halo = new THREE.Mesh(
+      new THREE.SphereGeometry(9, 12, 8),
+      new THREE.MeshBasicMaterial({ color: 0x88d8ff, transparent: true, opacity: 0.11, depthWrite: false, wireframe: true })
+    );
+    halo.scale.y = 0.42;
+    halo.position.set(x, groundY(x, z) + 2, z);
+    scene.add(halo);
+    s.halo = halo;
+  });
+  const stripTowns = [GEO.gazaCity, GEO.jabalia, GEO.khanYunis, GEO.rafah, GEO.deir].filter(Boolean);
+  stripTowns.forEach((p, i) => {
+    const s = makePatrol(p.x + rf(-3, 3), p.z + rf(-3, 3), rng() * 6.28, 'irn');
+    s.homeX = p.x; s.homeZ = p.z; s.side = 'irn';
+    register(s, { name: 'GZA-PAT ' + (i + 1), kind: 'Pattuglia', group: 'Isola', side: 'irn', maxHp: 6 });
+    addNpc('infantry', p.x, p.z, 'north');
+    addNpc('crew', p.x + 2, p.z, 'north');
+  });
+  const rd = makeRadar(GEO.gazaCity.x, GEO.gazaCity.z, 'irn');
+  rd.side = 'irn';
+  register(rd, { name: 'GZA-RAD', kind: 'Radar', group: 'Isola', side: 'irn', maxHp: 10 });
+  const j0 = makeJet(GEO.usSpot.x, GEO.usSpot.z + 8, 'sea');
+  j0.side = 'sea';
+  register(j0, { name: 'SEA-AIR 1', kind: 'Jet', group: 'Aria', side: 'sea', maxHp: 6 });
+  const h0 = makeHeli(GEO.usSpot.x + 6, GEO.usSpot.z, 'sea');
+  h0.side = 'sea';
+  register(h0, { name: 'SEA-HEL 1', kind: 'Elicottero', group: 'Aria', side: 'sea', maxHp: 8 });
+}
+
+let dayPhase = 0.5;
+let look = 'brief';
+let rainOn = false;
 let timeScale = 1;
 let paused = false;
-let cinematic = true;
+let cinematic = false;
 let cineT = 0;
 let battlePhase = 0;
 let simTime = 0;
@@ -1406,10 +1911,12 @@ const combatLines = [];
 function combatLog(msg) {
   combatLines.unshift({ t: simTime, msg });
   if (combatLines.length > 14) combatLines.pop();
+  const line = $('sitLine');
+  if (line) line.textContent = (battleOn ? 'FREE · ' : 'HOLD · ') + msg;
   const box = $('clog');
   if (!box) return;
   box.innerHTML = '';
-  combatLines.slice(0, 8).forEach((l) => {
+  combatLines.slice(0, 3).forEach((l) => {
     const d = document.createElement('div');
     const b = document.createElement('b');
     b.textContent = String(l.t | 0).padStart(3, '0') + 's ';
@@ -1456,11 +1963,13 @@ function fireProj(kind, x, y, z, vx, vy, vz, owner, target) {
   const m = allocProjMesh(hex, kind);
   m.position.set(x, y, z);
   scene.add(m);
-  projs.push({ kind, x, y, z, vx, vy, vz, owner, m, life: kind === 'missile' ? 9 : 7, target: target || null });
+  const rec = { kind, x, y, z, vx, vy, vz, owner, m, life: kind === 'missile' ? 9 : 7, target: target || null, tag: null };
+  projs.push(rec);
+  return rec;
 }
 
 function spawnDebrisAt(x, y, z, type, impulse) {
-  if (debris.length >= MAX_DEBRIS) debris.shift();
+  if (debris.length >= fxCap().debris) debris.shift();
   const pc = PAL[type] || PAL[STONE];
   debris.push({
     x, y, z, vx: rf(-5, 5) + (impulse?.x || 0), vy: rf(3, 10) + (impulse?.y || 0), vz: rf(-5, 5) + (impulse?.z || 0),
@@ -1479,6 +1988,7 @@ function supported(x, y, z) {
   return n >= 2;
 }
 function collapseRegion(x0, y0, z0, r) {
+  if (PERF.quality < 0.55) return;
   const R = Math.min(5, (r + 2) | 0);
   let n = 0;
   for (let y = (y0 + R) | 0; y >= y0 - 1; y--) {
@@ -1499,7 +2009,10 @@ function explode(cx, cy, cz, r) {
   r = Math.min(r, 3.6);
   const R2 = r * r;
   let removed = 0;
+  let debrisN = 0;
+  const cap = fxCap();
   boomAt(cx, cy, cz);
+  flashBoom(cx, cy, cz, r);
   cameraShake(r * (follow ? 1.4 : 1));
   for (let y = (cy - r) | 0; y <= cy + r; y++) {
     for (let x = (cx - r) | 0; x <= cx + r; x++) {
@@ -1508,12 +2021,15 @@ function explode(cx, cy, cz, r) {
         if (d2 > R2) continue;
         const t = get(x, y, z);
         if (!t || t === WATER || t === SHALLOW) continue;
-        if (removed < 100 && rng() < 0.45) spawnDebrisAt(x + 0.5, y + 0.5, z + 0.5, t, { x: (x - cx), y: 3.2, z: (z - cz) });
+        if (debrisN < cap.perBoom && rng() < 0.45) {
+          spawnDebrisAt(x + 0.5, y + 0.5, z + 0.5, t, { x: (x - cx), y: 3.2, z: (z - cz) });
+          debrisN++;
+        }
         set(x, y, z, 0);
         markDirty(x, y, z);
-        spawnPart(x, y + 0.5, z, rf(-0.6, 0.6), rf(1, 4), rf(-0.6, 0.6), rf(0.5, 1.3), 1, 0.45, 0.12);
+        if (debrisN < cap.perBoom) spawnPart(x, y + 0.5, z, rf(-0.6, 0.6), rf(1, 4), rf(-0.6, 0.6), rf(0.5, 1.3), 1, 0.45, 0.12);
         removed++;
-        if (removed > 150) { collapseRegion(cx | 0, cy | 0, cz | 0, 3); hitUnits(cx, cy, cz, r + 1, 3); return; }
+        if (removed > 90) { collapseRegion(cx | 0, cy | 0, cz | 0, 3); hitUnits(cx, cy, cz, r + 1, 3); return; }
       }
     }
   }
@@ -1595,21 +2111,44 @@ function hitUnits(x, y, z, r, dmg) {
   }
 }
 
+function setLook(name, phase) {
+  look = name === 'night' || name === 'live' ? name : 'brief';
+  cinematic = false;
+  document.body.classList.toggle('nightlook', look === 'night');
+  ['btnDawn', 'btnNoon', 'btnDusk', 'btnNight'].forEach((id) => { const el = $(id); if (el) el.classList.remove('on'); });
+  if (look === 'brief') { dayPhase = 0.5; $('btnNoon')?.classList.add('on'); }
+  else if (look === 'night') { dayPhase = 0; $('btnNight')?.classList.add('on'); }
+  else {
+    if (Number.isFinite(phase)) dayPhase = phase;
+    if (dayPhase < 0.5) $('btnDawn')?.classList.add('on');
+    else $('btnDusk')?.classList.add('on');
+  }
+  combatLog(look === 'night' ? 'look NIGHT' : look === 'live' ? 'look LIVE' : 'look BRIEF');
+}
 function updateSky(dt) {
-  if (!paused) dayPhase = (dayPhase + dt * timeScale / 160) % 1;
+  if (!paused && look === 'live') {
+    dayPhase = (dayPhase + dt * timeScale / 160) % 1;
+    if (dayPhase < 0.32) dayPhase = 0.32;
+    if (dayPhase > 0.68) dayPhase = 0.32;
+  }
+  if (look === 'brief') dayPhase = 0.5;
+  const nightSet = look === 'night';
   const ang = (dayPhase - 0.25) * Math.PI * 2;
   const sy = Math.sin(ang);
   const sx = Math.cos(ang);
-  sun.position.set(sx * 140, Math.max(2, sy * 110), 40);
+  sun.position.set(sx * 140, Math.max(2, nightSet ? 8 : sy * 110), 40);
   skyMat.uniforms.sunDir.value.copy(sun.position).normalize();
-  const day = Math.max(0, sy);
-  const dusk = Math.max(0, 1 - Math.abs(dayPhase - 0.75) * 8);
-  const dawn = Math.max(0, 1 - Math.abs(dayPhase - 0.25) * 8);
-  const night = Math.max(0, -sy);
-  sun.intensity = 0.18 + day * 1.12;
-  sun.color.setRGB(1, 0.88 - dusk * 0.2 + dawn * 0.05, 0.68 - dusk * 0.28 + dawn * 0.1);
+  let day = Math.max(0, sy);
+  if (look === 'live') day = Math.max(day, 0.42);
+  if (look === 'brief') day = 1;
+  const dusk = nightSet ? 0 : Math.max(0, 1 - Math.abs(dayPhase - 0.75) * 8);
+  const dawn = nightSet ? 0 : Math.max(0, 1 - Math.abs(dayPhase - 0.25) * 8);
+  const night = nightSet ? 1 : Math.max(0, -sy);
+  const flash = nightSet ? skyFlash : 0;
+  sun.intensity = nightSet ? 0.08 + flash * 1.15 : 0.38 + day * 1.22;
+  sun.color.setRGB(1, nightSet ? 0.72 + flash * 0.2 : 0.9 - dusk * 0.18 + dawn * 0.05, nightSet ? 0.42 + flash * 0.2 : 0.72 - dusk * 0.24 + dawn * 0.1);
   moon.position.set(-sx * 120, Math.max(4, -sy * 90), -40);
-  moon.intensity = night * 0.3;
+  moon.intensity = nightSet ? 0.85 + flash * 0.7 : 0.12 + night * 0.55;
   moonMesh.position.copy(moon.position);
   moonMesh.visible = night > 0.15;
   hormuzBeam.position.set(GEO.hormuz.x, 28, GEO.hormuz.z);
@@ -1618,19 +2157,23 @@ function updateSky(dt) {
     WATER_Y + 2,
     GEO.hormuz.z + Math.sin(simTime * 0.35) * 28
   );
-  hormuzBeam.intensity = Math.max(night, dusk * 0.7) * 3.4;
-  hemi.intensity = 0.2 + day * 0.42;
-  const fogCol = new THREE.Color().setRGB(
-    0.16 + day * 0.32 + dusk * 0.22 + dawn * 0.18,
-    0.18 + day * 0.34 + dawn * 0.08,
-    0.2 + day * 0.4
-  );
+  hormuzBeam.intensity = nightSet ? 4.2 + flash * 2.2 : Math.max(night, dusk * 0.7) * 3.4;
+  hemi.intensity = nightSet ? 0.2 + flash * 1.15 : 0.42 + day * 0.5;
+  if (typeof fill !== 'undefined') fill.intensity = nightSet ? 0.1 + flash * 0.7 : 0.32;
+  const fogCol = nightSet
+    ? new THREE.Color().setRGB(0.06 + flash * 0.22, 0.07 + flash * 0.1, 0.1 + flash * 0.04)
+    : new THREE.Color().setRGB(
+      0.22 + day * 0.34 + dusk * 0.22 + dawn * 0.18,
+      0.24 + day * 0.36 + dawn * 0.08,
+      0.28 + day * 0.42
+    );
   scene.fog.color.copy(fogCol);
-  scene.fog.density = 0.0048 + night * 0.003 + dawn * 0.0015;
+  scene.fog.density = nightSet ? Math.max(0.0009, 0.0022 - flash * 0.0012) : 0.0026 + night * 0.0015;
+  if (rainOn) scene.fog.density += 0.0007;
   scene.background.copy(fogCol);
-  skyMat.uniforms.top.value.setRGB(0.18 + day * 0.45, 0.28 + day * 0.4, 0.4 + day * 0.42);
-  skyMat.uniforms.bot.value.setRGB(0.55 + dawn * 0.3 + dusk * 0.28, 0.32 + day * 0.32, 0.22 + day * 0.35);
-  renderer.toneMappingExposure = 0.92 + day * 0.3 + dawn * 0.08;
+  skyMat.uniforms.top.value.setRGB(nightSet ? 0.04 + flash * 0.18 : 0.22 + day * 0.45, nightSet ? 0.06 + flash * 0.08 : 0.32 + day * 0.4, nightSet ? 0.1 : 0.44 + day * 0.42);
+  skyMat.uniforms.bot.value.setRGB(nightSet ? 0.08 + flash * 0.35 : 0.55 + dawn * 0.3 + dusk * 0.28, nightSet ? 0.09 + flash * 0.16 : 0.36 + day * 0.32, nightSet ? 0.12 + flash * 0.04 : 0.26 + day * 0.35);
+  renderer.toneMappingExposure = nightSet ? 0.88 + flash * 1.15 : 1.12 + day * 0.22;
   if (skyMat.uniforms.night) skyMat.uniforms.night.value = night;
   if (waterMat.uniforms) {
     waterMat.uniforms.time.value = simTime;
@@ -1657,14 +2200,19 @@ function updateSky(dt) {
     const o = order[i];
     if (!o || nightAmt < 0.12) { lampLights[i].intensity = 0; continue; }
     lampLights[i].position.set(o.x, o.y, o.z);
-    lampLights[i].intensity = nightAmt * (1.5 + Math.sin(simTime * 7 + i) * 0.2);
+    lampLights[i].intensity = nightAmt * ((nightSet ? 2.6 : 1.5) + Math.sin(simTime * 7 + i) * 0.2);
   }
   const hour = (dayPhase * 24) | 0;
   const names = ['Mezzanotte', 'Notte fonda', 'Ora del lupo', 'Buio', 'Prima dell\'alba', 'Alba',
     'Prima luce', 'Mattino', 'Convoglio', 'Avanti giorno', 'Sole alto', 'Mezzogiorno',
     'Mezzogiorno', 'Pomeriggio', 'Pomeriggio', 'Ora calda', 'Tardo giorno', 'Ora d\'oro',
     'Tramonto', 'Prima sera', 'Veglia', 'Prima veglia', 'Seconda veglia', 'Terza veglia'];
-  $('clock').textContent = names[hour] + ' · ' + String(hour).padStart(2, '0') + 'h';
+  const clk = $('clock');
+  if (clk) {
+    if (look === 'brief') clk.textContent = 'BRIEF · NOON';
+    else if (look === 'night') clk.textContent = 'NIGHT SET';
+    else clk.textContent = names[hour] + ' · ' + String(hour).padStart(2, '0') + 'h';
+  }
 }
 
 const keys = Object.create(null);
@@ -1690,7 +2238,7 @@ addEventListener('pointerdown', ensureAudio);
 
 function togglePause() {
   paused = !paused;
-  $('btnPause').textContent = paused ? 'Riprendi' : 'Pausa';
+  $('btnPause').textContent = paused ? 'Resume' : 'Hold time';
 }
 function playerFire() {
   ensureAudio();
@@ -1887,8 +2435,14 @@ function updateTrucks(dt) {
     t.u += dt * 0.035 * (t.dir || 1);
     if (t.u > 1) t.u = 0;
     if (t.u < 0) t.u = 1;
-    t.x = 8 + t.u * (W - 16);
-    t.z = t.lane + Math.sin(t.x * 0.04) * 0.6;
+    if (THEATER.id === 'gaza') {
+      const lane = t.lane || t.x;
+      t.x = lane + Math.sin(t.u * 6.28) * 6;
+      t.z = (t.z || lane) + Math.cos(t.u * 6.28) * 4;
+    } else {
+      t.x = 8 + t.u * (W - 16);
+      t.z = t.lane + Math.sin(t.x * 0.04) * 0.6;
+    }
     const y = groundY(t.x, t.z);
     t.heading = t.dir > 0 ? Math.PI / 2 : -Math.PI / 2;
     t.y = y;
@@ -1965,7 +2519,7 @@ function markOrder(x, z, hex) {
 const RADIO = [];
 function enqueueCmd(c) {
   combatLog((c.src || '?') + ' · ' + c.op);
-  if (c.src === 'sandbox') { CMDQ.push(c); return; }
+  if (c.src === 'sandbox' || c.src === 'ui') { CMDQ.push(c); return; }
   const wait = (c.op === 'fire' || c.op === 'bomb') ? 0.35 + rng() * 0.4 : 0.9 + rng() * 1.6;
   combatLog('radio · attesa ' + wait.toFixed(1) + 's');
   RADIO.push({ t: wait, c });
@@ -1991,18 +2545,18 @@ function applyCmd(c) {
   if (c.op !== 'possess' && c.op !== 'lock' && c.op !== 'battle' && c.op !== 'radar') {
     markOrder(x, z, c.op === 'navy' ? 0x3ec7c0 : c.op === 'artillery' ? 0x6a8a32 : 0xe8a54b);
   }
-  if (c.op === 'bomb') explode(x, WATER_Y + 5, z, c.r || 3.2);
-  else if (c.op === 'navy') {
+  if (c.op === 'bomb') {
+    explode(x, WATER_Y + 5, z, c.r || 3.2);
+    if ((c.zone || '') === 'farm' || (c.zone || '') === 'island') burstFromTerrain(x, z, 3);
+  } else if (c.op === 'navy') {
     if ((c.side || 'sea') === 'land') spawnLandGroup(c.n || 3);
-    else if (c.side === 'irn') spawnIrnGroup(c.n || 2);
+    else if (c.side === 'irn') spawnIrnGroup(c.n || 3);
     else spawnSeaGroup(c.n || 3);
   } else if (c.op === 'artillery') {
     for (let i = 0; i < 5; i++) explode(x + rf(-6, 6), WATER_Y + 4, z + rf(-6, 6), 2.2);
+    burstFromTerrain(x, z, 2);
   } else if (c.op === 'air') {
-    const side = c.side || 'sea';
-    const j = makeJet(side === 'land' ? 170 : 16, 70 + rng() * 30, side);
-    j.side = side;
-    register(j, { name: side.toUpperCase() + '-AIR ' + roster.length, kind: 'Jet', group: 'Aria', side, maxHp: 6 });
+    spawnAirFromCloud(c.side || 'sea');
   } else if (c.op === 'radar') {
     radars.forEach((r) => { if (r.g && r.g.userData.dish) r.g.userData.dish.rotation.y += 2; });
     combatLog('radar pulse');
@@ -2038,19 +2592,29 @@ function applyCmd(c) {
     u.side = c.side || 'land';
     register(u, { name: 'UAV ' + roster.length, kind: 'UAV', group: 'Aria', side: u.side, maxHp: 3 });
   } else if (c.op === 'heli') {
-    const h = makeHeli(x, z, c.side || 'irn');
+    const hx = c.side === 'sea' ? 22 : x;
+    const hz = c.side === 'sea' ? 86 : z;
+    if ((c.side || 'irn') === 'irn') burstFromTerrain(hx, hz, 2);
+    const h = makeHeli(hx, hz, c.side || 'irn');
     h.side = c.side || 'irn';
     register(h, { name: 'HEL ' + roster.length, kind: 'Elicottero', group: 'Aria', side: h.side, maxHp: 8 });
   } else if (c.op === 'oilfire') {
-    chainOil(x, z, 5);
+    burstFromTerrain(x, z, 4);
+    chainOil(x, z, 8);
+    spawnCivBurst(2);
   } else if (c.op === 'launch') {
     const cv = ships.find((s) => s.alive && s.kind === 'carrier');
     const j = makeJet(cv ? cv.x : 16, cv ? cv.z : 70, 'sea');
     j.side = 'sea';
     register(j, { name: 'SEA-LAUNCH ' + roster.length, kind: 'Jet', group: 'Aria', side: 'sea', maxHp: 6 });
   } else if (c.op === 'battle') {
-    battleOn = c.n ? c.n > 0 : !battleOn;
-    combatLog(battleOn ? 'battaglia ON' : 'pace');
+    battleOn = c.n != null ? c.n > 0 : !battleOn;
+    const b = $('btnBattle');
+    if (b) { b.textContent = battleOn ? 'Hold' : 'Free'; b.classList.toggle('on', battleOn); b.classList.toggle('hot', battleOn); }
+    document.body.classList.toggle('hotwar', !!battleOn);
+    const posture = $('posture');
+    if (posture) posture.textContent = battleOn ? 'WEAPONS FREE' : 'HOLD';
+    combatLog(battleOn ? 'WEAPONS FREE' : 'HOLD · theater quiet');
   } else if (c.op === 'moab') {
     explode(x, WATER_Y + 6, z, 5);
     for (let i = 0; i < 16; i++) spawnPart(x, WATER_Y + 8, z, rf(-3, 3), rf(4, 8), rf(-3, 3), 1.4, 1, 0.5, 0.1);
@@ -2102,20 +2666,88 @@ function connectBus() {
 function postCmd(body) {
   fetch('/cmd', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }).catch(() => enqueueCmd(body));
 }
-let waveT = 0, sandT = 0;
+let waveT = 0, sandT = 0, volleyT = 0;
+function fireStripVolley() {
+  const origins = [GEO.gazaCity, GEO.jabalia, GEO.khanYunis, GEO.rafah, GEO.deir, GEO.nuseirat].filter(Boolean);
+  const tgts = [GEO.sderot, GEO.ashkelon, GEO.netivot, GEO.zikim, GEO.ashdod, GEO.beerSheva, GEO.kiryatGat].filter(Boolean);
+  if (!origins.length || !tgts.length) return;
+  const room = MAX_PROJ - projs.length;
+  if (room < 4) return;
+  const n = Math.min(room - 2, PERF.quality < 0.55 ? 5 : PERF.quality < 0.8 ? 10 : 16);
+  for (let i = 0; i < n; i++) {
+    const o = origins[(rng() * origins.length) | 0];
+    const t = tgts[(rng() * tgts.length) | 0];
+    const ox = o.x + rf(-4, 4), oz = o.z + rf(-4, 4);
+    const oy = groundY(ox, oz) + 5;
+    const dx = t.x - ox, dz = t.z - oz;
+    const dist = Math.hypot(dx, dz) || 1;
+    const spd = 16;
+    const q = fireProj('missile', ox, oy, oz, (dx / dist) * spd, 6 + dist * 0.05, (dz / dist) * spd, 'irn');
+    if (q) { q.tag = 'in'; q.life = Math.min(14, 2.2 + dist / spd); }
+  }
+  combatLog('GZA · volée ' + n);
+}
+function updateDome(dt) {
+  if (THEATER.id !== 'gaza') return;
+  for (const r of radars) {
+    if (!r.alive || !r.dome) continue;
+    r.cool -= dt;
+    if (!battleOn || r.cool > 0) continue;
+    let best = null, bd = 36;
+    for (const p of projs) {
+      if (p.tag !== 'in') continue;
+      const d = Math.hypot(p.x - r.x, p.z - r.z);
+      if (d < bd) { bd = d; best = p; }
+    }
+    if (!best) continue;
+    r.cool = 0.28 + rng() * 0.22;
+    const dx = best.x - r.x, dy = best.y - (r.y + 2), dz = best.z - r.z;
+    const dist = Math.hypot(dx, dy, dz) || 1;
+    const q = fireProj('bolt', r.x, r.y + 3, r.z, (dx / dist) * 38, (dy / dist) * 38, (dz / dist) * 38, 'land', best);
+    if (q) { q.tag = 'dome'; q.life = 3; }
+  }
+}
 function updateBattle(dt) {
   drainCmds(dt);
   if (seatReload > 0) seatReload -= dt;
   if (battleOn) {
-    waveT += dt;
-    if (waveT > 22) {
-      waveT = 0;
-      if (countSide('sea') < 6) spawnSeaGroup(1);
-      if (countSide('irn') < 4) spawnIrnGroup(1);
+    if (THEATER.id === 'gaza') {
+      volleyT += dt;
+      if (volleyT > 0.85) { volleyT = 0; fireStripVolley(); }
+      waveT += dt;
+      if (waveT > 16) {
+        waveT = 0;
+        if (countSide('sea') < 8) spawnSeaGroup(1);
+        if (countSide('sea') < 10 && rng() < 0.5) spawnAirFromCloud('sea');
+        if (countSide('irn') < 12) spawnIrnGroup(1, { burst: false });
+        if (countSide('land') < 8) spawnLandGroup(1);
+      }
+    } else {
+      waveT += dt;
+      if (waveT > 14) {
+        waveT = 0;
+        if (countSide('sea') < 8) spawnSeaGroup(1);
+        if (countSide('sea') < 10 && rng() < 0.7) spawnAirFromCloud('sea');
+        if (countSide('irn') < 10) spawnIrnGroup(2);
+        if (countSide('land') < 5) spawnLandGroup(1);
+        if (rng() < 0.75) spawnCivBurst(2);
+        if (rng() < 0.4) spawnAirFromCloud('irn');
+      }
     }
   }
-  const sea = countSide('sea'), land = countSide('land'), irn = countSide('irn');
-  $('phase').innerHTML = (battleOn ? 'Battaglia' : 'Pace su Kharg') + '<span id="phased">SEA ' + sea + ' · LAND ' + land + ' · IRN ' + irn + '</span>';
+  const hud = THEATER.hud || { counts: ['sea', 'irnland', 'civ'] };
+  const nOf = (k) => {
+    if (k === 'irnland') return countSide('irn') + countSide('land');
+    return countSide(k);
+  };
+  const posture = $('posture');
+  if (posture) {
+    posture.textContent = battleOn ? 'WEAPONS FREE' : 'HOLD';
+    document.body.classList.toggle('hotwar', !!battleOn);
+    const fu = $('forceUs'); if (fu) fu.textContent = String(nOf(hud.counts[0]));
+    const fi = $('forceIrn'); if (fi) fi.textContent = String(nOf(hud.counts[1]));
+    const fc = $('forceCiv'); if (fc) fc.textContent = String(nOf(hud.counts[2]));
+  }
 }
 
 function updateProjs(dt) {
@@ -2130,12 +2762,27 @@ function updateProjs(dt) {
       p.vz += (tz / td) * 18 * dt;
     }
     p.vx *= 1 - 0.08 * dt; p.vz *= 1 - 0.08 * dt;
-    p.vy -= (p.kind === 'bolt' ? 10 : 14) * dt;
+    const grav = p.tag === 'in' || p.tag === 'dome' ? 3.2 : (p.kind === 'bolt' ? 10 : 14);
+    p.vy -= grav * dt;
     p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt;
     p.m.position.set(p.x, p.y, p.z);
     p.m.lookAt(p.x + p.vx, p.y + p.vy, p.z + p.vz);
     if (p.kind === 'missile' || p.kind === 'shell') spawnPart(p.x, p.y, p.z, 0, 0.2, 0, 0.28, 1, 0.55, 0.15);
     let hit = false;
+    if (p.tag === 'in') {
+      for (let j = projs.length - 1; j >= 0; j--) {
+        const d = projs[j];
+        if (!d || d.tag !== 'dome') continue;
+        if (Math.hypot(d.x - p.x, d.y - p.y, d.z - p.z) < 2.6) {
+          spawnPart(p.x, p.y, p.z, rf(-1, 1), 2, rf(-1, 1), 0.5, 0.7, 0.9, 1);
+          spawnPart(p.x, p.y, p.z, 0, 1, 0, 0.4, 1, 0.8, 0.2);
+          freeProjMesh(d.m); projs.splice(j, 1);
+          if (j < i) i--;
+          hit = true;
+          break;
+        }
+      }
+    }
     if (p.y < 0 || p.life <= 0 || p.x < -4 || p.z < -4 || p.x >= W + 4 || p.z >= D + 4) hit = true;
     else {
       const t = get(p.x | 0, p.y | 0, p.z | 0);
@@ -2246,20 +2893,29 @@ function startFollow(u) {
   follow = u;
   cinematic = false;
   if (u.ref && u.ref.spd == null) u.ref.spd = 0;
-  setSeat(true);
-  $('followHint').textContent = 'SEI ' + u.name + ' · WASD peso · G spara · Spazio esci';
+  if (camMode === 'tac') {
+    setSeat(false);
+    const p = unitPos(u);
+    controls.target.set(p.x, 12, p.z);
+    camera.position.set(p.x - 6, 112, p.z + 18);
+    $('followHint').textContent = 'Tattica · ' + u.name + ' · click per possess';
+  } else {
+    setSeat(true);
+    $('followHint').textContent = 'SEI ' + u.name + ' · WASD peso · G spara · Spazio esci';
+  }
   rosterDirty = true;
   buildRoster(true);
 }
 function stopFollow(msg) {
   follow = null;
   setSeat(false);
-  $('followHint').textContent = msg || 'Clicca un mezzo — o prendi portaerei';
+  $('followHint').textContent = msg || 'Select an asset · M tactical';
   rosterDirty = true;
 }
 function updateFollow(dt) {
   if (follow && !follow.alive) stopFollow((follow.name || 'Mezzo') + ' — sei morto');
   if (!follow || !follow.alive) return;
+  if (camMode === 'tac') return;
   cinematic = false;
   const st = seatOf(follow.kind);
   const p = unitPos(follow);
@@ -2321,7 +2977,7 @@ function buildLabels() {
   geoLabelEls.length = 0;
   for (const g of Object.values(GEO)) {
     const el = document.createElement('div');
-    el.className = 'glab' + (g.kind === 'city' ? ' city' : '');
+    el.className = 'glab' + (g.kind === 'city' ? ' city' : '') + (g.kind === 'spot' ? ' spot ' + (g.army || '') : '');
     el.textContent = g.name;
     host.appendChild(el);
     geoLabelEls.push({ g, el });
@@ -2349,22 +3005,22 @@ function updateCinematic(dt) {
   cineT += dt;
   const t = cineT;
   let p, look;
-  if (t < 8) {
-    const u = t / 8;
-    p = new THREE.Vector3(18 + u * 16, 62 - u * 8, 148 - u * 10);
+  if (t < 10) {
+    const u = t / 10;
+    p = new THREE.Vector3(8 + u * 10, 86 - u * 8, 132 - u * 12);
     look = new THREE.Vector3(GEO.kharg.x, 14, GEO.kharg.z);
-  } else if (t < 16) {
-    const u = (t - 8) / 8;
-    p = new THREE.Vector3(GEO.kharg.x + 18 - u * 6, 28 + u * 4, GEO.kharg.z + 22 - u * 8);
+  } else if (t < 18) {
+    const u = (t - 10) / 8;
+    p = new THREE.Vector3(GEO.kharg.x - 30 + u * 8, 58, GEO.kharg.z + 48 - u * 6);
     look = new THREE.Vector3(GEO.kharg.x, 16, GEO.kharg.z);
-  } else if (t < 24) {
-    const u = (t - 16) / 8;
-    p = new THREE.Vector3(18 + u * 10, 22, 70 + u * 8);
+  } else if (t < 26) {
+    const u = (t - 18) / 8;
+    p = new THREE.Vector3(14 + u * 8, 42, 78 + u * 6);
     look = new THREE.Vector3(GEO.seaIsland.x, 14, GEO.kharg.z);
-  } else if (t < 32) {
-    const u = (t - 24) / 8;
-    p = new THREE.Vector3(GEO.mainland.x - 8 + u * 8, 36 - u * 6, GEO.mainland.z + 12);
-    look = new THREE.Vector3(GEO.mainland.x, 14, GEO.kharg.z);
+  } else if (t < 34) {
+    const u = (t - 26) / 8;
+    p = new THREE.Vector3(GEO.mainland.x - 14 + u * 6, 52 - u * 6, GEO.mainland.z + 18);
+    look = new THREE.Vector3(GEO.kharg.x + 20, 14, GEO.kharg.z);
   } else {
     cinematic = false;
     return;
@@ -2375,6 +3031,21 @@ function updateCinematic(dt) {
 
 function moveCam(dt) {
   if (cinematic) return;
+  if (camMode === 'tac') {
+    const sp = (keys.ShiftLeft ? 48 : 24) * dt;
+    const fwd = new THREE.Vector3();
+    camera.getWorldDirection(fwd);
+    fwd.y = 0; fwd.normalize();
+    const right = new THREE.Vector3().crossVectors(fwd, new THREE.Vector3(0, 1, 0)).normalize();
+    const t = controls.target;
+    if (keys.KeyW) { t.addScaledVector(fwd, sp); camera.position.addScaledVector(fwd, sp); }
+    if (keys.KeyS) { t.addScaledVector(fwd, -sp); camera.position.addScaledVector(fwd, -sp); }
+    if (keys.KeyA) { t.addScaledVector(right, -sp); camera.position.addScaledVector(right, -sp); }
+    if (keys.KeyD) { t.addScaledVector(right, sp); camera.position.addScaledVector(right, -sp); }
+    if (keys.KeyQ) { t.y -= sp; camera.position.y -= sp; }
+    if (keys.KeyE) { t.y += sp; camera.position.y += sp; }
+    return;
+  }
   if (follow && follow.alive && follow.ref) {
     const o = follow.ref;
     const st = seatOf(follow.kind);
@@ -2562,13 +3233,14 @@ const mmap = $('minimap');
 const mctx = mmap ? mmap.getContext('2d') : null;
 let mapLand = null;
 function bakeMinimap() {
-  mapLand = mctx.createImageData(196, 164);
+  const mw = mmap.width, mh = mmap.height;
+  mapLand = mctx.createImageData(mw, mh);
   const d = mapLand.data;
-  for (let py = 0; py < 164; py++) {
-    for (let px = 0; px < 196; px++) {
-      const x = (px / 196) * W, z = (py / 164) * D;
+  for (let py = 0; py < mh; py++) {
+    for (let px = 0; px < mw; px++) {
+      const x = (px / mw) * W, z = (py / mh) * D;
       const t = get(x | 0, WATER_Y, z | 0);
-      const i = (py * 196 + px) * 4;
+      const i = (py * mw + px) * 4;
       let r = 12, g = 28, b = 36;
       if (isSolid(t) || (surf[(x | 0) + (z | 0) * W] > WATER_Y)) {
         const h = surf[(x | 0) + (z | 0) * W] || WATER_Y;
@@ -2584,7 +3256,7 @@ function bakeMinimap() {
 function drawMinimap() {
   if (!mctx || !mapLand) return;
   mctx.putImageData(mapLand, 0, 0);
-  const toP = (x, z) => [(x / W) * 196, (z / D) * 164];
+  const toP = (x, z) => [(x / W) * mmap.width, (z / D) * mmap.height];
   const dot = (x, z, col, s) => {
     const p = toP(x, z);
     mctx.fillStyle = col;
@@ -2599,11 +3271,17 @@ function drawMinimap() {
   for (const s of ships) {
     if (!s.alive && !s.sinking) continue;
     if (!near(s.x, s.z)) continue;
-    const col = s.side === 'irn' ? '#d4452a' : s.side === 'land' ? '#6a8a32' : s.side === 'civ' ? '#e8a54b' : '#3ec7c0';
-    dot(s.x, s.z, col, s.kind === 'tanker' ? 2.2 : 1.4);
+    const col = s.side === 'irn' ? '#d4452a' : s.side === 'land' ? '#c45a3a' : s.side === 'civ' ? '#e8a54b' : '#3ec7c0';
+    dot(s.x, s.z, col, s.kind === 'tanker' ? 3 : s.kind === 'carrier' ? 3.2 : 2.1);
   }
-  for (const h of helis) if (h.alive && near(h.x, h.z)) dot(h.x, h.z, '#fff', 1);
-  for (const j of jets) if (j.alive && near(j.x, j.z)) dot(j.x, j.z, '#ffae42', 1);
+  for (const h of helis) if (h.alive && near(h.x, h.z)) dot(h.x, h.z, '#fff', 1.4);
+  for (const j of jets) if (j.alive && near(j.x, j.z)) dot(j.x, j.z, '#ffae42', 1.4);
+  for (const s of spots) {
+    const p = toP(s.x, s.z);
+    mctx.strokeStyle = s.army === 'us' ? '#3ec7c0' : '#d4452a';
+    mctx.lineWidth = 1.5;
+    mctx.beginPath(); mctx.arc(p[0], p[1], 7, 0, 6.28); mctx.stroke();
+  }
   const c = toP(camera.position.x, camera.position.z);
   mctx.strokeStyle = '#f3ead6';
   mctx.beginPath(); mctx.arc(c[0], c[1], 5, 0, 6.28); mctx.stroke();
@@ -2620,11 +3298,19 @@ if (mmap) mmap.addEventListener('click', (e) => {
 let camMode = 'orbit';
 function setCamMode(m) {
   camMode = m;
+  document.body.classList.toggle('tac', m === 'tac');
+  const btn = $('btnMap');
+  if (btn) btn.classList.toggle('on', m === 'tac');
   if (m === 'tac') {
     cinematic = false; stopFollow();
-    camera.position.set(GEO.tss.x, 92, GEO.tss.z + 8);
-    controls.target.set(GEO.tss.x, 12, GEO.tss.z);
+    camera.position.set(GEO.kharg.x - 8, 128, GEO.kharg.z + 22);
+    controls.target.set(GEO.kharg.x, 12, GEO.kharg.z);
+    camera.fov = 46;
+  } else {
+    camera.fov = 54;
   }
+  camera.updateProjectionMatrix();
+  renderer.setPixelRatio(Math.min(devicePixelRatio, m === 'tac' ? 1 : 1.25));
 }
 
 let gradeRT = null, gradeScene = null, gradeCam = null, gradeMat = null;
@@ -2635,8 +3321,8 @@ function initGrade() {
     uniforms: {
       tDiffuse: { value: null },
       vig: { value: 0.38 },
-      sat: { value: 1.1 },
-      lift: { value: 0.04 }
+      sat: { value: 1.22 },
+      lift: { value: 0.05 }
     },
     vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position.xy,0.0,1.0); }`,
     fragmentShader: `
@@ -2740,7 +3426,7 @@ function seaAmbience() {
   seaAmp = g;
 }
 
-const fill = new THREE.DirectionalLight(0x88aacc, 0.18);
+const fill = new THREE.DirectionalLight(0x88aacc, 0.32);
 fill.position.set(-40, 20, -30);
 scene.add(fill);
 
@@ -2767,6 +3453,9 @@ function animate() {
   moveCam(dt);
   updateFollow(dt);
   updateCinematic(dt);
+  updateSpots();
+  updateBoomLights(dt);
+  updateRain(dt);
   controls.update();
   if (sdt) {
     updateNpcs(sdt);
@@ -2784,6 +3473,7 @@ function animate() {
     if (hi || (PERF.frame & 1)) aimTurrets();
     collideShips();
     updateBattle(sdt);
+    updateDome(sdt);
     updateProjs(sdt);
     updateDebris(sdt);
     updateParts(sdt);
@@ -2800,12 +3490,13 @@ function animate() {
   updateFollowMeter();
   if ((PERF.frame % PERF.mmapEvery) === 0) drawMinimap();
   skyMesh.position.copy(camera.position);
+  if (camera.position.y > 55) scene.fog.density = Math.min(scene.fog.density, 0.0018);
   if (camera.position.y < WATER_Y + 1.2) {
     scene.fog.density += 0.008;
     scene.fog.color.lerp(new THREE.Color(0x0a3040), 0.4);
   }
   applyShake();
-  if (PERF.gradeOn) renderGrade();
+  if (PERF.gradeOn && camMode !== 'tac' && look !== 'night') renderGrade();
   else renderer.render(scene, camera);
 }
 
@@ -2817,7 +3508,19 @@ async function boot(s) {
   $('hud').style.display = 'none';
   $('loader').style.display = 'flex';
   errBox.style.display = 'none';
-  progress(2, 'Alba su Kharg…');
+  progress(2, THEATER.bootLine);
+  const tt = $('theaterTitle');
+  if (tt) tt.textContent = 'Theater ' + THEATER.title;
+  const hud = THEATER.hud;
+  if (hud && hud.labels) {
+    const lu = $('lblUs'); if (lu) lu.textContent = hud.labels[0];
+    const li = $('lblIrn'); if (li) li.textContent = hud.labels[1];
+    const lc = $('lblCiv'); if (lc) lc.textContent = hud.labels[2];
+  }
+  if (THEATER.stations) {
+    const ss = $('stSea'); if (ss) ss.textContent = THEATER.stations.sea;
+    const si = $('stIrn'); if (si) si.textContent = THEATER.stations.irn;
+  }
   await new Promise((r) => requestAnimationFrame(r));
   PERF.begin('gen');
   await generateWorld(s, progress);
@@ -2842,13 +3545,19 @@ async function boot(s) {
   await new Promise((r) => setTimeout(r, 160));
   $('loader').style.display = 'none';
   $('hud').style.display = 'block';
+  cinematic = false;
+  setLook('brief');
+  setCamMode('tac');
   window.HORMUZ = {
     voxelCount, seed, npcs: npcs.length, ships: ships.length,
     explode, W, D, H, scene, camera, controls, roster, GEO,
-    startFollow, killCraft, regen, perf: PERF, cmd: postCmd, applyCmd,
+    startFollow, killCraft, regen, perf: PERF, cmd: postCmd, applyCmd, parseVoice,
     snapshot: () => PERF.snapshot(),
     get dayPhase() { return dayPhase; },
-    set dayPhase(v) { dayPhase = v; }
+    set dayPhase(v) { dayPhase = v; },
+    get look() { return look; },
+    setLook, setRain,
+    theater: THEATER, theaters: listTheaters(), weather
   };
   } finally {
     generating = false;
@@ -2858,7 +3567,7 @@ async function boot(s) {
 
 async function regen() {
   const s = parseInt($('seedIn').value, 10);
-  cinematic = true; cineT = 0; simTime = 0; battlePhase = 0; dayPhase = 0.22; paused = false;
+  cinematic = false; cineT = 0; simTime = 0; battlePhase = 0; dayPhase = 0.5; look = 'brief'; paused = false;
   stopFollow();
   debris.length = 0; parts.length = 0;
   while (projs.length) { const p = projs.pop(); freeProjMesh(p.m); }
@@ -2867,31 +3576,50 @@ async function regen() {
 
 $('btnGo').onclick = regen;
 $('btnPause').onclick = togglePause;
-$('btnDawn').onclick = () => { dayPhase = 0.22; cinematic = false; };
-$('btnNoon').onclick = () => { dayPhase = 0.5; cinematic = false; };
-$('btnDusk').onclick = () => { dayPhase = 0.74; cinematic = false; };
-$('btnNight').onclick = () => { dayPhase = 0.0; cinematic = false; };
-$('btnCine').onclick = () => { cinematic = true; cineT = 0; };
+$('btnDawn').onclick = () => setLook('live', 0.32);
+$('btnNoon').onclick = () => setLook('brief');
+$('btnDusk').onclick = () => setLook('live', 0.62);
+$('btnNight').onclick = () => setLook('night');
+if ($('btnRain')) $('btnRain').onclick = () => setRain(!rainOn);
+if (!weather.enabled) {
+  if ($('btnNight')) $('btnNight').style.display = 'none';
+  if ($('btnRain')) $('btnRain').style.display = 'none';
+}
+function goTheater(id) { location.search = '?t=' + id; }
+if ($('btnTKharg')) { $('btnTKharg').onclick = () => goTheater('kharg'); $('btnTKharg').classList.toggle('on', THEATER.id === 'kharg'); }
+if ($('btnTHormuz')) { $('btnTHormuz').onclick = () => goTheater('hormuz'); $('btnTHormuz').classList.toggle('on', THEATER.id === 'hormuz'); }
+if ($('btnTGaza')) { $('btnTGaza').onclick = () => goTheater('gaza'); $('btnTGaza').classList.toggle('on', THEATER.id === 'gaza'); }
+$('btnCine').onclick = () => { cinematic = true; cineT = 0; setCamMode('orbit'); };
 if ($('btnMap')) $('btnMap').onclick = () => setCamMode(camMode === 'tac' ? 'orbit' : 'tac');
 $('btnStrike').onclick = playerFire;
-if ($('btnBomb')) $('btnBomb').onclick = () => postCmd({ op: 'bomb', x: GEO.kharg.x, z: GEO.kharg.z, r: 3.4, src: 'ui' });
+if ($('btnBomb')) $('btnBomb').onclick = () => postCmd({ op: 'bomb', zone: 'island', r: 3.4, src: 'ui' });
 if ($('btnNavy')) $('btnNavy').onclick = () => postCmd({ op: 'navy', side: 'sea', n: 3, src: 'ui' });
-if ($('btnArty')) $('btnArty').onclick = () => postCmd({ op: 'artillery', x: GEO.mainland.x, z: GEO.kharg.z, src: 'ui' });
 if ($('btnAir')) $('btnAir').onclick = () => postCmd({ op: 'air', side: 'sea', src: 'ui' });
-if ($('btnDrop')) $('btnDrop').onclick = () => postCmd({ op: 'paradrop', x: GEO.kharg.x, z: GEO.kharg.z, side: 'land', src: 'ui' });
-if ($('btnBattle')) $('btnBattle').onclick = () => {
-  battleOn = !battleOn;
-  $('btnBattle').textContent = battleOn ? 'Pace' : 'Battaglia';
-  combatLog(battleOn ? 'battaglia ON' : 'pace');
-};
-if ($('voiceIn')) $('voiceIn').addEventListener('keydown', (e) => {
-  if (e.code !== 'Enter') return;
-  const text = $('voiceIn').value.trim();
+if ($('btnLaunch')) $('btnLaunch').onclick = () => postCmd({ op: 'launch', src: 'ui' });
+if ($('btnCruise')) $('btnCruise').onclick = () => postCmd({ op: 'cruise', src: 'ui' });
+if ($('btnIrn')) $('btnIrn').onclick = () => postCmd({ op: 'navy', side: 'irn', n: 3, src: 'ui' });
+if ($('btnHeli')) $('btnHeli').onclick = () => postCmd({ op: 'heli', side: 'irn', zone: 'island', src: 'ui' });
+if ($('btnLand')) $('btnLand').onclick = () => postCmd({ op: 'navy', side: 'land', n: 2, src: 'ui' });
+if ($('btnDrop')) $('btnDrop').onclick = () => postCmd({ op: 'paradrop', zone: 'island', side: 'land', src: 'ui' });
+if ($('btnOil')) $('btnOil').onclick = () => postCmd({ op: 'oilfire', zone: 'farm', src: 'ui' });
+if ($('btnFarm')) $('btnFarm').onclick = () => postCmd({ op: 'bomb', zone: 'farm', r: 3.8, src: 'ui' });
+if ($('btnArty')) $('btnArty').onclick = () => postCmd({ op: 'artillery', zone: 'coast', src: 'ui' });
+if ($('btnBattle')) $('btnBattle').onclick = () => postCmd({ op: 'battle', n: battleOn ? 0 : 1, src: 'ui' });
+function sendVoice() {
+  const el = $('voiceIn');
+  const text = el && el.value.trim();
   if (!text) return;
-  fetch('/voice', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text, src: 'voice' }) })
-    .catch(() => enqueueCmd(parseVoice(text, 'voice')));
-  $('voiceIn').value = '';
-});
+  const parsed = parseVoice(text, 'ui');
+  if (parsed.error) {
+    combatLog('voce · non capisco «' + text + '»');
+    el.value = '';
+    return;
+  }
+  postCmd({ ...parsed, src: 'ui' });
+  el.value = '';
+}
+if ($('voiceIn')) $('voiceIn').addEventListener('keydown', (e) => { if (e.code === 'Enter') sendVoice(); });
+if ($('btnVoice')) $('btnVoice').onclick = sendVoice;
 
 addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight;

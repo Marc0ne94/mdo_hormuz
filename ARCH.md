@@ -1,7 +1,7 @@
-# KHARG — piano e motore (slice 1, chiuso)
+# KHARG / HORMUZ — motore
 
-Sandbox voxel. Non è un wargame con vincitore. Non è un aiuto al targeting.
-Geografia pubblica. Classi mezzo = giocattoli MagicaVoxel, non loadout reali.
+Sandbox voxel. Geografia pubblica. Classi mezzo = giocattoli (cubetti oggi; gltf quando c’è il file).
+Quadro lungo: [docs/CONSIDERAZIONI.txt](docs/CONSIDERAZIONI.txt).
 
 Voce di MDO (prompt −1 e −2): [MDO.MD](MDO.MD).
 
@@ -19,7 +19,7 @@ Voce di MDO (prompt −1 e −2): [MDO.MD](MDO.MD).
 | Versus dopo | **fuori scope**. Non indovinare. |
 | Mondo scalabile | chunk 32 già lì; W×D resta 192×160 finché il bus è verde |
 
-Stretto di Hormuz (~480 km a SE): **fuori da questa scacchiera**.
+Tre teatri-modello (`theaters/`, `?t=`): **kharg**, **gaza** (striscia piatta + cornice; USA dal mare, ISR a terra, volée vs cupola giocattolo), **hormuz** (Dubai–Kahnuj). Switch = reload engine (un mondo in RAM). Meteo = plugin, off in test.
 
 ## Geografica (pubblica)
 
@@ -57,7 +57,7 @@ Fonte op: `ops.mjs`. POST `/cmd` e `hormuz_cmd` usano lo stesso JSON.
   "x","z","r","n","side","weapon","who","zone","src" }
 ```
 
-POST `/cmd` → coda + SSE. POST `/voice` → `parse-voice.mjs` → stesso bus.
+POST `/cmd` → coda + SSE. POST `/voice` → `parse-voice.mjs` → stesso bus. Voce non riconosciuta: HTTP 400, `seq` invariato, niente `bomb` di default.
 GET `/events` SSE. GET `/status` (include `ops` e `version`).
 UI e `window.HORMUZ.cmd(obj)` wrappano POST.
 
